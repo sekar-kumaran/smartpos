@@ -18,13 +18,13 @@ from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy import (
+    JSON,
     Boolean,
     DateTime,
     Enum,
     ForeignKey,
     Index,
     Integer,
-    JSON,
     Numeric,
     String,
     Text,
@@ -33,7 +33,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
-
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -195,11 +194,11 @@ class Store(Base):
     updated_at:  Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
     # Relationships
-    users:     Mapped[list["User"]]     = relationship(back_populates="store")
-    products:  Mapped[list["Product"]]  = relationship(back_populates="store")
-    customers: Mapped[list["Customer"]] = relationship(back_populates="store")
-    sales:     Mapped[list["Sale"]]     = relationship(back_populates="store")
-    branches:  Mapped[list["Branch"]]   = relationship(back_populates="store")
+    users:     Mapped[list[User]]     = relationship(back_populates="store")
+    products:  Mapped[list[Product]]  = relationship(back_populates="store")
+    customers: Mapped[list[Customer]] = relationship(back_populates="store")
+    sales:     Mapped[list[Sale]]     = relationship(back_populates="store")
+    branches:  Mapped[list[Branch]]   = relationship(back_populates="store")
 
 
 class Branch(Base):
@@ -216,7 +215,7 @@ class Branch(Base):
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
-    store: Mapped["Store"] = relationship(back_populates="branches")
+    store: Mapped[Store] = relationship(back_populates="branches")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -245,8 +244,8 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
-    store: Mapped["Store" | None] = relationship(back_populates="users")
-    sales: Mapped[list["Sale"]]      = relationship(back_populates="cashier")
+    store: Mapped[Store | None] = relationship(back_populates="users")
+    sales: Mapped[list[Sale]]      = relationship(back_populates="cashier")
 
     __table_args__ = (
         Index("ix_users_store_id", "store_id"),
@@ -302,7 +301,7 @@ class GSTTaxComponent(Base):
     cess_amount:  Mapped[Decimal]    = mapped_column(Numeric(12, 2), default=0)
     total_tax:    Mapped[Decimal]    = mapped_column(Numeric(12, 2), nullable=False)
 
-    sale_item: Mapped["SaleItem"] = relationship(back_populates="gst_component")
+    sale_item: Mapped[SaleItem] = relationship(back_populates="gst_component")
 
     @property
     def gst_rate(self) -> Decimal:
@@ -326,8 +325,8 @@ class Category(Base):
     parent_id: Mapped[int | None] = mapped_column(ForeignKey("categories.id"))
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
 
-    products:  Mapped[list["Product"]]  = relationship(back_populates="category")
-    children:  Mapped[list["Category"]] = relationship()
+    products:  Mapped[list[Product]]  = relationship(back_populates="category")
+    children:  Mapped[list[Category]] = relationship()
     __table_args__ = (UniqueConstraint("store_id", "name"),)
 
 
@@ -377,12 +376,12 @@ class Product(Base):
     created_at:   Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at:   Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
-    store:    Mapped["Store"]              = relationship(back_populates="products")
-    category: Mapped["Category" | None] = relationship(back_populates="products")
-    variants: Mapped[list["ProductVariant"]] = relationship(
+    store:    Mapped[Store]              = relationship(back_populates="products")
+    category: Mapped[Category | None] = relationship(back_populates="products")
+    variants: Mapped[list[ProductVariant]] = relationship(
         back_populates="product", cascade="all, delete-orphan"
     )
-    suppliers: Mapped[list["ProductSupplier"]] = relationship(back_populates="product")
+    suppliers: Mapped[list[ProductSupplier]] = relationship(back_populates="product")
 
     __table_args__ = (
         Index("ix_products_store_id",  "store_id"),
@@ -424,12 +423,12 @@ class ProductVariant(Base):
     sort_order:   Mapped[int]      = mapped_column(Integer, default=0)
     created_at:   Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
-    product: Mapped["Product"]          = relationship(back_populates="variants")
-    batches: Mapped[list["StockBatch"]] = relationship(
+    product: Mapped[Product]          = relationship(back_populates="variants")
+    batches: Mapped[list[StockBatch]] = relationship(
         back_populates="variant", cascade="all, delete-orphan",
         order_by="StockBatch.expiry_date"
     )
-    sale_items: Mapped[list["SaleItem"]] = relationship(back_populates="variant")
+    sale_items: Mapped[list[SaleItem]] = relationship(back_populates="variant")
 
     __table_args__ = (
         Index("ix_variant_product",  "product_id"),
@@ -469,9 +468,9 @@ class StockBatch(Base):
 
     is_active:   Mapped[bool] = mapped_column(Boolean, default=True)
 
-    variant:  Mapped["ProductVariant"]           = relationship(back_populates="batches")
-    po_item:  Mapped["PurchaseOrderItem" | None] = relationship()
-    supplier: Mapped["Supplier" | None]       = relationship()
+    variant:  Mapped[ProductVariant]           = relationship(back_populates="batches")
+    po_item:  Mapped[PurchaseOrderItem | None] = relationship()
+    supplier: Mapped[Supplier | None]       = relationship()
 
     __table_args__ = (
         Index("ix_batch_variant",  "variant_id"),
@@ -545,8 +544,8 @@ class ProductSupplier(Base):
     lead_days:    Mapped[int]    = mapped_column(Integer, default=7)
     is_preferred: Mapped[bool]   = mapped_column(Boolean, default=False)
 
-    product:  Mapped["Product"]  = relationship(back_populates="suppliers")
-    supplier: Mapped["Supplier"] = relationship()
+    product:  Mapped[Product]  = relationship(back_populates="suppliers")
+    supplier: Mapped[Supplier] = relationship()
     __table_args__ = (UniqueConstraint("product_id", "supplier_id"),)
 
 
@@ -571,8 +570,8 @@ class PurchaseOrder(Base):
     created_at:    Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at:    Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
-    supplier: Mapped["Supplier"]               = relationship()
-    items:    Mapped[list["PurchaseOrderItem"]] = relationship(
+    supplier: Mapped[Supplier]               = relationship()
+    items:    Mapped[list[PurchaseOrderItem]] = relationship(
         back_populates="po", cascade="all, delete-orphan"
     )
     __table_args__ = (Index("ix_po_store", "store_id"),)
@@ -590,8 +589,8 @@ class PurchaseOrderItem(Base):
     gst_rate:     Mapped[Decimal] = mapped_column(Numeric(5, 2), default=0)
     line_total:   Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
 
-    po:      Mapped["PurchaseOrder"]  = relationship(back_populates="items")
-    variant: Mapped["ProductVariant"] = relationship()
+    po:      Mapped[PurchaseOrder]  = relationship(back_populates="items")
+    variant: Mapped[ProductVariant] = relationship()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -629,10 +628,10 @@ class Customer(Base):
     def outstanding_balance(self) -> Decimal:
         return self.total_credit_given - self.total_credit_repaid
 
-    store:          Mapped["Store"]                    = relationship(back_populates="customers")
-    credits:        Mapped[list["Credit"]]             = relationship(back_populates="customer")
-    sales:          Mapped[list["Sale"]]               = relationship(back_populates="customer")
-    price_category: Mapped["PriceCategory" | None] = relationship(foreign_keys=[price_category_id])
+    store:          Mapped[Store]                    = relationship(back_populates="customers")
+    credits:        Mapped[list[Credit]]             = relationship(back_populates="customer")
+    sales:          Mapped[list[Sale]]               = relationship(back_populates="customer")
+    price_category: Mapped[PriceCategory | None] = relationship(foreign_keys=[price_category_id])
 
     __table_args__ = (
         Index("ix_customer_store", "store_id"),
@@ -694,13 +693,13 @@ class Sale(Base):
 
     created_at: Mapped[datetime]         = mapped_column(DateTime(timezone=True), default=utcnow)
 
-    store:    Mapped["Store"]                 = relationship(back_populates="sales")
-    cashier:  Mapped["User"]                  = relationship(back_populates="sales")
-    customer: Mapped["Customer" | None]    = relationship(back_populates="sales")
-    items:    Mapped[list["SaleItem"]]         = relationship(
+    store:    Mapped[Store]                 = relationship(back_populates="sales")
+    cashier:  Mapped[User]                  = relationship(back_populates="sales")
+    customer: Mapped[Customer | None]    = relationship(back_populates="sales")
+    items:    Mapped[list[SaleItem]]         = relationship(
         back_populates="sale", cascade="all, delete-orphan"
     )
-    payments: Mapped[list["SalePayment"]]     = relationship(
+    payments: Mapped[list[SalePayment]]     = relationship(
         back_populates="sale", cascade="all, delete-orphan"
     )
 
@@ -734,12 +733,12 @@ class SaleItem(Base):
     line_total:    Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
 
     # GST breakdown (one-to-one)
-    gst_component: Mapped["GSTTaxComponent" | None] = relationship(
+    gst_component: Mapped[GSTTaxComponent | None] = relationship(
         back_populates="sale_item", cascade="all, delete-orphan"
     )
 
-    sale:    Mapped["Sale"]           = relationship(back_populates="items")
-    variant: Mapped["ProductVariant"] = relationship(back_populates="sale_items")
+    sale:    Mapped[Sale]           = relationship(back_populates="items")
+    variant: Mapped[ProductVariant] = relationship(back_populates="sale_items")
 
     __table_args__ = (Index("ix_sale_item_sale", "sale_id"),)
 
@@ -756,7 +755,7 @@ class SalePayment(Base):
     gateway_status: Mapped[str | None]= mapped_column(String(50))
     created_at:     Mapped[datetime]     = mapped_column(DateTime(timezone=True), default=utcnow)
 
-    sale: Mapped["Sale"] = relationship(back_populates="payments")
+    sale: Mapped[Sale] = relationship(back_populates="payments")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -779,8 +778,8 @@ class Credit(Base):
     created_at:   Mapped[datetime]     = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at:   Mapped[datetime]     = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
-    customer:   Mapped["Customer"]              = relationship(back_populates="credits")
-    repayments: Mapped[list["CreditRepayment"]] = relationship(
+    customer:   Mapped[Customer]              = relationship(back_populates="credits")
+    repayments: Mapped[list[CreditRepayment]] = relationship(
         back_populates="credit", cascade="all, delete-orphan"
     )
     __table_args__ = (Index("ix_credit_store_customer", "store_id", "customer_id"),)
@@ -797,7 +796,7 @@ class CreditRepayment(Base):
     notes:      Mapped[str | None]= mapped_column(Text)
     created_at: Mapped[datetime]     = mapped_column(DateTime(timezone=True), default=utcnow)
 
-    credit: Mapped["Credit"] = relationship(back_populates="repayments")
+    credit: Mapped[Credit] = relationship(back_populates="repayments")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -884,7 +883,7 @@ class PriceCategory(Base):
     is_active:   Mapped[bool] = mapped_column(Boolean, default=True)
     created_at:  Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
-    price_tiers: Mapped[list["ProductPriceTier"]] = relationship(
+    price_tiers: Mapped[list[ProductPriceTier]] = relationship(
         back_populates="price_category", cascade="all, delete-orphan"
     )
 
@@ -910,8 +909,8 @@ class ProductPriceTier(Base):
     created_at:         Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at:         Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
-    price_category: Mapped["PriceCategory"] = relationship(back_populates="price_tiers")
-    product:        Mapped["Product"]        = relationship()
+    price_category: Mapped[PriceCategory] = relationship(back_populates="price_tiers")
+    product:        Mapped[Product]        = relationship()
 
     __table_args__ = (
         UniqueConstraint("price_category_id", "product_id"),
@@ -954,8 +953,8 @@ class ShiftSession(Base):
     notes:         Mapped[str | None] = mapped_column(Text)
     status:        Mapped[ShiftStatus]   = mapped_column(Enum(ShiftStatus), default=ShiftStatus.OPEN)
 
-    opened_by: Mapped["User"] = relationship(foreign_keys=[opened_by_id])
-    closed_by: Mapped["User" | None] = relationship(foreign_keys=[closed_by_id])
+    opened_by: Mapped[User] = relationship(foreign_keys=[opened_by_id])
+    closed_by: Mapped[User | None] = relationship(foreign_keys=[closed_by_id])
 
     __table_args__ = (
         Index("ix_shift_store_status", "store_id", "status"),

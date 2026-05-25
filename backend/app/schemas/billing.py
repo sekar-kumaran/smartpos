@@ -12,7 +12,6 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.models.models import PaymentMethod, SaleStatus, SupplyType
 
-
 # ─── Sale Item ────────────────────────────────────────────────────────────────
 
 class SaleItemCreate(BaseModel):

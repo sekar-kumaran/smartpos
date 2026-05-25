@@ -6,7 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.security import get_current_user_id
 from app.schemas.schemas import (
-    LoginRequest, RegisterRequest, TokenResponse, UserOut,
+    LoginRequest,
+    RegisterRequest,
+    TokenResponse,
+    UserOut,
 )
 from app.services.auth_service import AuthService
 

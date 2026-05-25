@@ -13,7 +13,6 @@ from kombu import Exchange, Queue
 
 from app.core.config import settings
 
-
 celery_app = Celery(
     "smartpos-community",
     broker=settings.CELERY_BROKER_URL,

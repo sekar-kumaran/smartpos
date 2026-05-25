@@ -12,8 +12,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.models import (
-    BusinessAlert, AlertSeverity, AlertType,
-    Credit, CreditRepayment, CreditStatus, Customer,
+    AlertSeverity,
+    AlertType,
+    BusinessAlert,
+    Credit,
+    CreditRepayment,
+    CreditStatus,
+    Customer,
 )
 from app.schemas.schemas import CreditCreate, CreditExposure, RepaymentCreate
 

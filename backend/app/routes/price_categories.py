@@ -11,8 +11,11 @@ from app.core.database import get_db
 from app.core.security import get_current_user_id
 from app.models.models import Customer, PriceCategory, Product, ProductPriceTier
 from app.schemas.schemas import (
-    PriceCategoryCreate, PriceCategoryOut, PriceCategoryUpdate,
-    ProductPriceTierCreate, ProductPriceTierOut,
+    PriceCategoryCreate,
+    PriceCategoryOut,
+    PriceCategoryUpdate,
+    ProductPriceTierCreate,
+    ProductPriceTierOut,
 )
 
 router = APIRouter()
@@ -28,7 +31,7 @@ async def list_price_categories(
 ):
     result = await db.execute(
         select(PriceCategory)
-        .where(PriceCategory.store_id == store_id, PriceCategory.is_active == True)
+        .where(PriceCategory.store_id == store_id, PriceCategory.is_active.is_(True))
         .order_by(PriceCategory.is_default.desc(), PriceCategory.name)
     )
     return result.scalars().all()
@@ -45,7 +48,7 @@ async def create_price_category(
         existing = await db.execute(
             select(PriceCategory).where(
                 PriceCategory.store_id == payload.store_id,
-                PriceCategory.is_default == True,
+                PriceCategory.is_default.is_(True),
             )
         )
         for cat in existing.scalars().all():

@@ -13,18 +13,32 @@ from sqlalchemy.orm import selectinload
 from app.core.database import get_db
 from app.core.security import get_current_user_id
 from app.models.models import (
-    Category, POStatus, Product, ProductVariant,
-    PurchaseOrder, PurchaseOrderItem, StockBatch, Supplier,
+    Category,
+    POStatus,
+    Product,
+    ProductVariant,
+    PurchaseOrder,
+    PurchaseOrderItem,
+    StockBatch,
+    Supplier,
 )
 from app.schemas.inventory import (
-    BatchOut, BatchReceive,
-    CategoryCreate, CategoryOut,
+    BatchOut,
+    BatchReceive,
+    CategoryCreate,
+    CategoryOut,
     InventoryHealth,
-    POCreate, POOut,
-    ProductCreate, ProductOut, ProductUpdate,
-    StockAdjustment, StockMovementOut,
-    SupplierCreate, SupplierOut,
-    VariantCreate, VariantOut,
+    POCreate,
+    POOut,
+    ProductCreate,
+    ProductOut,
+    ProductUpdate,
+    StockAdjustment,
+    StockMovementOut,
+    SupplierCreate,
+    SupplierOut,
+    VariantCreate,
+    VariantOut,
 )
 from app.services.inventory.service import InventoryService
 
@@ -217,7 +231,7 @@ async def list_batches(
     """List batches for a variant in FIFO order (earliest expiry first)."""
     q = select(StockBatch).where(StockBatch.variant_id == variant_id)
     if active_only:
-        q = q.where(StockBatch.is_active == True, StockBatch.qty_remaining > 0)
+        q = q.where(StockBatch.is_active.is_(True), StockBatch.qty_remaining > 0)
     q = q.order_by(
         StockBatch.expiry_date.asc().nullslast(),
         StockBatch.received_at.asc(),
@@ -245,7 +259,7 @@ async def adjust_stock(
     if variant_id is None and payload.product_id is not None:
         result = await db.execute(
             select(ProductVariant.id)
-            .where(ProductVariant.product_id == payload.product_id, ProductVariant.is_active == True)
+            .where(ProductVariant.product_id == payload.product_id, ProductVariant.is_active.is_(True))
             .order_by(ProductVariant.id)
             .limit(1)
         )
@@ -314,7 +328,7 @@ async def list_suppliers(
     db: AsyncSession = Depends(get_db),
 ):
     q = select(Supplier).where(
-        Supplier.store_id == store_id, Supplier.is_active == True
+        Supplier.store_id == store_id, Supplier.is_active.is_(True)
     )
     count_r = await db.execute(select(func.count()).select_from(q.subquery()))
     total   = count_r.scalar() or 0

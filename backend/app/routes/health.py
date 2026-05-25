@@ -1,6 +1,7 @@
 """Health check endpoints — used by Docker, load balancers, and monitoring."""
 
 import time
+
 from fastapi import APIRouter, Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession

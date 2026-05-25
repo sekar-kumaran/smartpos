@@ -89,8 +89,6 @@ async def loyalty_customers(
         .limit(page_size)
     )
     customers = list(result.scalars().all())
-
-    config = LoyaltyConfig()
     items: list[CustomerLoyaltyOut] = []
     for c in customers:
         pts = c.loyalty_points

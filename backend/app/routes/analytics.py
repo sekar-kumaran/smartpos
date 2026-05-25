@@ -139,10 +139,10 @@ async def list_alerts(
     """Paginated unresolved business alerts for the alerts screen."""
     filters = [
         BusinessAlert.store_id == store_id,
-        BusinessAlert.is_resolved == False,
+        BusinessAlert.is_resolved.is_(False),
     ]
     if unread_only:
-        filters.append(BusinessAlert.is_read == False)
+        filters.append(BusinessAlert.is_read.is_(False))
 
     total = await db.scalar(select(func.count(BusinessAlert.id)).where(*filters))
     result = await db.execute(
@@ -218,8 +218,8 @@ async def gstr1_summary(
     """Aggregate sales data for GSTR-1 filing — one row per month."""
     try:
         year, month = int(period[:4]), int(period[5:])
-    except ValueError:
-        raise HTTPException(status_code=422, detail="period must be YYYY-MM")
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="period must be YYYY-MM") from exc
 
     start = datetime(year, month, 1, tzinfo=datetime.UTC)
     # Last day: first day of next month minus 1 second

@@ -17,10 +17,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.models import (
-    AlertSeverity, AlertType, BusinessAlert,
-    Product, ProductVariant, StockBatch,
-    StockMovement, StockMovementType,
-    PurchaseOrder, PurchaseOrderItem, POStatus, Store, Supplier,
+    AlertSeverity,
+    AlertType,
+    BusinessAlert,
+    Product,
+    ProductVariant,
+    StockBatch,
+    StockMovement,
+    StockMovementType,
+    Store,
 )
 
 logger = logging.getLogger("smartpos.inventory")
@@ -96,7 +101,7 @@ class InventoryService:
     async def get_product(self, db: AsyncSession, product_id: int) -> Product:
         result = await db.execute(
             select(Product)
-            .where(Product.id == product_id, Product.is_active == True)
+                .where(Product.id == product_id, Product.is_active.is_(True))
             .options(selectinload(Product.variants))
         )
         product = result.scalar_one_or_none()
@@ -116,7 +121,7 @@ class InventoryService:
     ) -> tuple[list[Product], int]:
         q = (
             select(Product)
-            .where(Product.store_id == store_id, Product.is_active == True)
+                .where(Product.store_id == store_id, Product.is_active.is_(True))
             .options(selectinload(Product.variants))
         )
         if search:
@@ -232,11 +237,9 @@ class InventoryService:
             supplier_id=supplier_id,
             po_item_id=po_item_id,
         )
-        db.add(batch)
         await db.flush()
 
         # Update variant total stock
-        qty_before = variant.stock_qty
         variant.stock_qty += quantity
 
         # Record movement
@@ -279,7 +282,7 @@ class InventoryService:
             select(StockBatch)
             .where(
                 StockBatch.variant_id == variant_id,
-                StockBatch.is_active == True,
+                StockBatch.is_active.is_(True),
                 StockBatch.qty_remaining > 0,
             )
             .order_by(
@@ -328,7 +331,6 @@ class InventoryService:
                     batch.is_active = False
 
         # Update variant total
-        qty_before = variant.stock_qty
         variant.stock_qty -= qty_to_deduct
 
         await self._record_movement(
@@ -404,10 +406,10 @@ class InventoryService:
 
     async def get_health(
         self, db: AsyncSession, store_id: int
-    ) -> "InventoryHealth":
+    ) -> InventoryHealth:
         result = await db.execute(
             select(Product)
-            .where(Product.store_id == store_id, Product.is_active == True)
+            .where(Product.store_id == store_id, Product.is_active.is_(True))
             .options(selectinload(Product.variants))
         )
         products = result.scalars().all()

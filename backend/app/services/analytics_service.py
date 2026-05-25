@@ -202,7 +202,7 @@ class AnalyticsService:
     ) -> list[BusinessAlert]:
         result = await db.execute(
             select(BusinessAlert)
-            .where(BusinessAlert.store_id == store_id, BusinessAlert.is_resolved == False)
+            .where(BusinessAlert.store_id == store_id, BusinessAlert.is_resolved.is_(False))
             .order_by(BusinessAlert.created_at.desc())
             .limit(limit)
         )

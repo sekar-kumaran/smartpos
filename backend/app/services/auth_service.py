@@ -9,10 +9,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.security import (
-    create_access_token, create_refresh_token,
-    decode_token, hash_password, verify_password,
+    create_access_token,
+    create_refresh_token,
+    decode_token,
+    hash_password,
+    verify_password,
 )
-from app.models.models import Store, User
+from app.models.models import User
 from app.schemas.schemas import LoginRequest, RegisterRequest, TokenResponse
 
 

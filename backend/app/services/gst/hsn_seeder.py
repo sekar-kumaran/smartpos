@@ -179,6 +179,7 @@ async def seed_hsn_codes(db) -> int:
     Returns number of records inserted/updated.
     """
     from sqlalchemy import text
+
     from app.models.models import GSTTaxSlab
 
     count = 0

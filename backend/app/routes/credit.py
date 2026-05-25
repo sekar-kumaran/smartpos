@@ -8,7 +8,12 @@ from app.core.database import get_db
 from app.core.security import get_current_user_id
 from app.models.models import CreditStatus, Customer, PriceCategory
 from app.schemas.schemas import (
-    CreditCreate, CreditOut, RepaymentCreate, CreditExposure, CustomerCreate, CustomerOut,
+    CreditCreate,
+    CreditExposure,
+    CreditOut,
+    CustomerCreate,
+    CustomerOut,
+    RepaymentCreate,
 )
 from app.services.credit_service import CreditService
 
@@ -79,7 +84,7 @@ async def list_customers(
     q = (
         select(Customer, PriceCategory.name.label("cat_name"))
         .outerjoin(PriceCategory, PriceCategory.id == Customer.price_category_id)
-        .where(Customer.store_id == store_id, Customer.is_active == True)
+        .where(Customer.store_id == store_id, Customer.is_active.is_(True))
     )
     if search:
         term = f"%{search}%"

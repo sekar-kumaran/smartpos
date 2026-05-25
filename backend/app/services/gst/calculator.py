@@ -21,7 +21,6 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from app.core.config import settings
 
-
 # ─── Constants ────────────────────────────────────────────────────────────────
 
 GST_SLABS = {

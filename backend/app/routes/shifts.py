@@ -13,7 +13,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.security import get_current_user_id
 from app.models.models import (
-    PaymentMethod, Sale, SaleStatus, ShiftSession, ShiftStatus, User,
+    PaymentMethod,
+    Sale,
+    SaleStatus,
+    ShiftSession,
+    ShiftStatus,
+    User,
 )
 from app.schemas.schemas import ShiftCloseRequest, ShiftOpenRequest, ShiftOut
 

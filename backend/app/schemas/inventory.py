@@ -13,7 +13,6 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.models.models import GSTTaxSlab, POStatus, StockMovementType
 
-
 # ─── Category ─────────────────────────────────────────────────────────────────
 
 class CategoryCreate(BaseModel):

@@ -59,7 +59,7 @@ class BackupService:
             ]
             backup_data["tables"][table] = [
                 {
-                    key: value if isinstance(value, (str, int, float, bool, type(None))) else str(value)
+                    key: value if isinstance(value, str | int | float | bool | type(None)) else str(value)
                     for key, value in row.items()
                 }
                 for row in filtered

@@ -23,10 +23,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.models import (
-    Credit, CreditStatus, Customer,
-    GSTTaxComponent, PaymentMethod,
-    Product, ProductPriceTier, ProductVariant, Sale, SaleItem, SalePayment,
-    SaleStatus, Store, SupplyType,
+    Credit,
+    CreditStatus,
+    Customer,
+    GSTTaxComponent,
+    PaymentMethod,
+    Product,
+    ProductPriceTier,
+    ProductVariant,
+    Sale,
+    SaleItem,
+    SalePayment,
+    SaleStatus,
+    Store,
+    SupplyType,
 )
 from app.services.gst.calculator import GSTBreakdown, make_calculator
 from app.services.inventory.service import InventoryService
@@ -145,7 +155,7 @@ class BillingService:
             if variant_id is None and item_data.get("product_id") is not None:
                 default_variant = await db.scalar(
                     select(ProductVariant.id)
-                    .where(ProductVariant.product_id == item_data["product_id"], ProductVariant.is_active == True)
+                    .where(ProductVariant.product_id == item_data["product_id"], ProductVariant.is_active.is_(True))
                     .order_by(ProductVariant.id)
                     .limit(1)
                 )
@@ -271,7 +281,7 @@ class BillingService:
         await db.flush()  # get sale.id
 
         # ── Attach items and GST components ─────────────────────────────────
-        for si, bd in zip(sale_items, gst_components):
+        for si, bd in zip(sale_items, gst_components, strict=False):
             si.sale_id = sale.id
             db.add(si)
             await db.flush()  # get si.id

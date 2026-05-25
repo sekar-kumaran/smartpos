@@ -162,7 +162,6 @@ def _extract_via_regex(transcript: str) -> list[dict]:
             continue
 
         qty_raw  = m.group(1) or "1"
-        unit_raw = m.group(2) or ""
         name     = m.group(3).strip()
 
         if not name or len(name) < 2:

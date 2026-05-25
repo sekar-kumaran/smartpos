@@ -8,7 +8,6 @@ and low-stock alert generation — all as background jobs.
 from __future__ import annotations
 
 import asyncio
-import logging
 from datetime import datetime, timedelta
 
 from celery import shared_task
@@ -43,13 +42,17 @@ def check_expiry_alerts(self):
     Runs daily at 8:00 AM IST.
     """
     async def _inner():
-        from app.core.database import AsyncSessionFactory
-        from app.models.models import (
-            StockBatch, ProductVariant, Product,
-            BusinessAlert, AlertType, AlertSeverity,
-        )
         from sqlalchemy import select
         from sqlalchemy.orm import selectinload
+
+        from app.core.database import AsyncSessionFactory
+        from app.models.models import (
+            AlertSeverity,
+            AlertType,
+            BusinessAlert,
+            ProductVariant,
+            StockBatch,
+        )
 
         now        = datetime.now(datetime.UTC)
         in_7_days  = now + timedelta(days=7)
@@ -63,7 +66,7 @@ def check_expiry_alerts(self):
                 select(StockBatch)
                 .where(
                     StockBatch.expiry_date.isnot(None),
-                    StockBatch.is_active == True,
+                    StockBatch.is_active.is_(True),
                     StockBatch.qty_remaining > 0,
                 )
                 .options(selectinload(StockBatch.variant).selectinload(ProductVariant.product))
@@ -157,7 +160,7 @@ def check_expiry_alerts(self):
         return _run(_inner())
     except Exception as exc:
         logger.error("check_expiry_alerts failed: %s", exc)
-        raise self.retry(exc=exc)
+        raise self.retry(exc=exc) from exc
 
 
 # ─── Reorder Point Check ──────────────────────────────────────────────────────
@@ -175,13 +178,17 @@ def check_reorder(self):
     Runs every 6 hours.
     """
     async def _inner():
-        from app.core.database import AsyncSessionFactory
-        from app.models.models import (
-            ProductVariant, Product,
-            BusinessAlert, AlertType, AlertSeverity,
-        )
         from sqlalchemy import select
         from sqlalchemy.orm import selectinload
+
+        from app.core.database import AsyncSessionFactory
+        from app.models.models import (
+            AlertSeverity,
+            AlertType,
+            BusinessAlert,
+            Product,
+            ProductVariant,
+        )
 
         alerts_created = 0
 
@@ -190,9 +197,9 @@ def check_reorder(self):
                 select(ProductVariant)
                 .join(Product, Product.id == ProductVariant.product_id)
                 .where(
-                    Product.is_active == True,
-                    ProductVariant.is_active == True,
-                    Product.track_inventory == True,
+                    Product.is_active.is_(True),
+                    ProductVariant.is_active.is_(True),
+                    Product.track_inventory.is_(True),
                 )
                 .options(selectinload(ProductVariant.product))
             )
@@ -246,4 +253,4 @@ def check_reorder(self):
     try:
         return _run(_inner())
     except Exception as exc:
-        raise self.retry(exc=exc)
+        raise self.retry(exc=exc) from exc

@@ -11,10 +11,14 @@ from decimal import Decimal
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from app.models.models import (
-    AlertSeverity, AlertType, CreditStatus, PaymentMethod,
-    SaleStatus, ShiftStatus, UserRole,
+    AlertSeverity,
+    AlertType,
+    CreditStatus,
+    PaymentMethod,
+    SaleStatus,
+    ShiftStatus,
+    UserRole,
 )
-
 
 # ─── Common ───────────────────────────────────────────────────────────────────
 

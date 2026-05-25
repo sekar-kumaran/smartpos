@@ -10,9 +10,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.security import get_current_user_id
 from app.schemas.billing import (
-    CreateSaleRequest, GSTINValidateRequest, GSTINValidateResponse,
-    OfflineSyncPayload, OfflineSyncResponse, SaleOut,
-    TaxPreviewRequest, TaxPreviewResponse,
+    CreateSaleRequest,
+    GSTINValidateRequest,
+    GSTINValidateResponse,
+    OfflineSyncPayload,
+    OfflineSyncResponse,
+    SaleOut,
+    TaxPreviewRequest,
+    TaxPreviewResponse,
 )
 from app.services.billing.service import BillingService
 from app.services.gst.calculator import STATE_CODES, make_calculator, validate_gstin
@@ -38,22 +43,26 @@ async def tax_preview(payload: TaxPreviewRequest, _: int = Depends(get_current_u
     """Live GST computation without creating a sale — for cart UI."""
     from sqlalchemy import select
     from sqlalchemy.orm import selectinload
-    from app.models.models import Customer, ProductVariant, Product, Store
+
+    from app.models.models import Customer, ProductVariant, Store
     store_r = await db.execute(select(Store).where(Store.id == payload.store_id))
     store   = store_r.scalar_one_or_none()
-    if not store: raise HTTPException(404, "Store not found")
+    if not store:
+        raise HTTPException(404, "Store not found")
     customer_state = customer_gstin = None
     if payload.customer_id:
         cr = await db.execute(select(Customer).where(Customer.id == payload.customer_id))
         c  = cr.scalar_one_or_none()
-        if c: customer_state, customer_gstin = c.state_code, c.gstin
+        if c:
+            customer_state, customer_gstin = c.state_code, c.gstin
     gst_calc   = make_calculator(store.state_code, customer_state, customer_gstin, is_composition=(store.gst_regime.value == "composite"))
     items_out  = []
     breakdowns = []
     for item in payload.items:
         vr = await db.execute(select(ProductVariant).where(ProductVariant.id == item.variant_id).options(selectinload(ProductVariant.product)))
         v  = vr.scalar_one_or_none()
-        if not v: continue
+        if not v:
+            continue
         p         = v.product
         eff_price = Decimal(str(item.unit_price)) if item.unit_price else (v.selling_price or p.selling_price)
         bd        = gst_calc.compute_line_item(base_price=eff_price, qty=item.qty, gst_rate=Decimal(p.gst_rate.value), discount=item.discount, cess_rate=p.cess_rate, price_inclusive=p.price_includes_tax, hsn_code=item.hsn_code or p.hsn_code)
@@ -92,8 +101,10 @@ async def sync_offline(payload: OfflineSyncPayload, user_id: int = Depends(get_c
             sale = await _service.create_sale(db=db, store_id=payload.store_id, cashier_id=user_id, items=[i.model_dump() for i in sd.items], payment_method=sd.payment_method, customer_id=sd.customer_id, overall_discount=sd.overall_discount, amount_paid=sd.amount_paid, notes=sd.notes, local_id=sd.local_id)
             invoices.append(sale.invoice_number)
         except Exception as exc:
-            if "409" in str(exc) or "already recorded" in str(exc).lower(): skipped += 1
-            else: errors.append({"local_id": sd.local_id, "error": str(exc)})
+            if "409" in str(exc) or "already recorded" in str(exc).lower():
+                skipped += 1
+            else:
+                errors.append({"local_id": sd.local_id, "error": str(exc)})
     from app.models.models import SyncLog
     db.add(SyncLog(store_id=payload.store_id, device_id=payload.device_id, records_sent=len(payload.sales), records_recv=len(invoices), conflicts=skipped, status="success" if not errors else "partial"))
     return OfflineSyncResponse(device_id=payload.device_id, synced=len(invoices), skipped=skipped, failed=len(errors), invoices=invoices, errors=errors)
