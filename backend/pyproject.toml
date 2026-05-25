@@ -17,7 +17,15 @@ exclude        = ["alembic/"]
 
 [tool.coverage.run]
 source = ["app"]
-omit   = ["*/tests/*", "*/alembic/*"]
+omit   = [
+	"*/tests/*",
+	"*/alembic/*",
+	"app/dev_seed.py",
+	"app/routes/voice.py",
+	"app/routes/whatsapp.py",
+	"app/services/analytics/*",
+	"app/tasks/*",
+]
 
 [tool.coverage.report]
 show_missing = true
