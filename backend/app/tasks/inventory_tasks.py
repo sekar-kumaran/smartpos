@@ -8,7 +8,7 @@ and low-stock alert generation — all as background jobs.
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
@@ -54,7 +54,7 @@ def check_expiry_alerts(self):
             StockBatch,
         )
 
-        now        = datetime.now(timezone.utc)
+        now        = datetime.now(UTC)
         in_7_days  = now + timedelta(days=7)
         in_30_days = now + timedelta(days=30)
 

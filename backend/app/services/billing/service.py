@@ -14,7 +14,7 @@ Key upgrades over skeleton:
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import ROUND_HALF_UP, Decimal
 
 from fastapi import HTTPException
@@ -54,11 +54,11 @@ class BillingService:
     async def _next_invoice_number(
         self, db: AsyncSession, store_id: int
     ) -> str:
-        today = datetime.now(timezone.utc).strftime("%Y%m%d")
+        today = datetime.now(UTC).strftime("%Y%m%d")
         result = await db.execute(
             select(func.count(Sale.id)).where(
                 Sale.store_id == store_id,
-                func.date(Sale.created_at) == datetime.now(timezone.utc).date(),
+                func.date(Sale.created_at) == datetime.now(UTC).date(),
             )
         )
         count = (result.scalar() or 0) + 1
@@ -338,7 +338,7 @@ class BillingService:
         if customer:
             customer.total_purchases  += 1
             customer.total_spent      += total_amount
-            customer.last_purchase_at  = datetime.now(timezone.utc)
+            customer.last_purchase_at  = datetime.now(UTC)
 
         await db.flush()
         logger.info(

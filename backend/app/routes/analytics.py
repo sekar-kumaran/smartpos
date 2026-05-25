@@ -1,6 +1,6 @@
 """SmartPOS AI – Analytics Routes (Phase 1A)"""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
@@ -38,7 +38,7 @@ async def profit_summary(
     db: AsyncSession = Depends(get_db),
 ):
     """Profit summary for a date range."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     if period:
         if period == "today":
             start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -76,7 +76,7 @@ async def top_products(
     db: AsyncSession = Depends(get_db),
 ):
     """Top products by revenue in a date range."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     sd  = start_date or (now - timedelta(days=30))
     ed  = end_date or now
     return await _service.get_top_products(db, store_id, sd, ed, limit)
@@ -221,12 +221,12 @@ async def gstr1_summary(
     except ValueError as exc:
         raise HTTPException(status_code=422, detail="period must be YYYY-MM") from exc
 
-    start = datetime(year, month, 1, tzinfo=timezone.utc)
+    start = datetime(year, month, 1, tzinfo=UTC)
     # Last day: first day of next month minus 1 second
     if month == 12:
-        end = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+        end = datetime(year + 1, 1, 1, tzinfo=UTC)
     else:
-        end = datetime(year, month + 1, 1, tzinfo=timezone.utc)
+        end = datetime(year, month + 1, 1, tzinfo=UTC)
 
     result = await db.execute(
         select(
