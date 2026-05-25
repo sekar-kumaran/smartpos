@@ -18,7 +18,6 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from decimal import ROUND_HALF_UP, Decimal
-from typing import Optional
 
 from app.core.config import settings
 
@@ -87,7 +86,7 @@ class GSTBreakdown:
     cess_amount: Decimal = Decimal("0")
 
     supply_type: str = "intra"
-    hsn_code:    Optional[str] = None
+    hsn_code:    str | None = None
 
     @property
     def total_tax(self) -> Decimal:
@@ -193,7 +192,7 @@ def _verify_gstin_checksum(gstin: str) -> bool:
     return check_char == gstin[-1]
 
 
-def extract_state_from_gstin(gstin: str) -> Optional[str]:
+def extract_state_from_gstin(gstin: str) -> str | None:
     """Extract the 2-digit state code from a GSTIN."""
     if gstin and len(gstin) >= 2:
         return gstin[:2]
@@ -226,7 +225,7 @@ class GSTCalculator:
     def __init__(
         self,
         seller_state: str,
-        buyer_state:  Optional[str] = None,
+        buyer_state:  str | None = None,
         is_export:    bool = False,
         is_composition: bool = False,
     ):
@@ -255,7 +254,7 @@ class GSTCalculator:
         discount:        Decimal = Decimal("0"),
         cess_rate:       Decimal = Decimal("0"),
         price_inclusive: bool    = False,
-        hsn_code:        Optional[str] = None,
+        hsn_code:        str | None = None,
     ) -> GSTBreakdown:
         """
         Compute complete GST breakdown for a single line item.
@@ -385,8 +384,8 @@ class GSTCalculator:
 
 def make_calculator(
     store_state: str,
-    customer_state: Optional[str] = None,
-    customer_gstin: Optional[str] = None,
+    customer_state: str | None = None,
+    customer_gstin: str | None = None,
     is_export: bool = False,
     is_composition: bool = False,
 ) -> GSTCalculator:

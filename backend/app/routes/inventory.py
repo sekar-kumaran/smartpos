@@ -5,8 +5,6 @@ Products · Variants · Batches · Suppliers · Purchase Orders · Stock Movemen
 
 from __future__ import annotations
 
-from typing import Optional
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -86,8 +84,8 @@ async def create_product(
 @router.get("/products", response_model=dict)
 async def list_products(
     store_id:       int           = Query(...),
-    search:         Optional[str] = Query(None),
-    category_id:    Optional[int] = Query(None),
+    search:         str | None = Query(None),
+    category_id:    int | None = Query(None),
     low_stock_only: bool          = Query(False),
     page:           int           = Query(1, ge=1),
     page_size:      int           = Query(50, ge=1, le=200),
@@ -267,7 +265,7 @@ async def adjust_stock(
 @router.get("/stock/movements", response_model=dict)
 async def stock_movements(
     store_id:   int           = Query(...),
-    variant_id: Optional[int] = Query(None),
+    variant_id: int | None = Query(None),
     page:       int           = Query(1, ge=1),
     page_size:  int           = Query(50, ge=1, le=200),
     _: int = Depends(get_current_user_id),
@@ -339,10 +337,10 @@ async def create_purchase_order(
     db: AsyncSession = Depends(get_db),
 ):
     """Create a purchase order. Stock updated when marked RECEIVED."""
-    from datetime import datetime, timezone
+    from datetime import datetime
     from decimal import Decimal
 
-    today   = datetime.now(timezone.utc).strftime("%Y%m%d")
+    today   = datetime.now(datetime.UTC).strftime("%Y%m%d")
     cnt_res = await db.execute(
         select(func.count(PurchaseOrder.id))
         .where(PurchaseOrder.store_id == payload.store_id)
@@ -395,7 +393,7 @@ async def receive_purchase_order(
     """
     Receive a PO — creates stock batches and updates variant quantities.
     """
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     result = await db.execute(
         select(PurchaseOrder)
@@ -426,14 +424,14 @@ async def receive_purchase_order(
         item.qty_received = item.qty_ordered
 
     po.status        = POStatus.RECEIVED
-    po.received_date = datetime.now(timezone.utc)
+    po.received_date = datetime.now(datetime.UTC)
     return po
 
 
 @router.get("/purchase-orders", response_model=dict)
 async def list_purchase_orders(
     store_id:  int           = Query(...),
-    status:    Optional[str] = Query(None),
+    status:    str | None = Query(None),
     page:      int           = Query(1, ge=1),
     page_size: int           = Query(50, ge=1, le=200),
     _: int = Depends(get_current_user_id),

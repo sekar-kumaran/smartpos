@@ -16,10 +16,10 @@ Multi-tenant flow:
 from __future__ import annotations
 
 import logging
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Optional
 
-from sqlalchemy import event, text
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncConnection,
     AsyncSession,
@@ -87,7 +87,7 @@ LocalSessionFactory = async_sessionmaker(
 # ─── Tenant Context ───────────────────────────────────────────────────────────
 
 async def set_tenant_context(
-    session: AsyncSession, tenant_id: Optional[int]
+    session: AsyncSession, tenant_id: int | None
 ) -> None:
     """
     Set the PostgreSQL GUC variable for RLS isolation.

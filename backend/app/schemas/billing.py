@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -17,12 +16,12 @@ from app.models.models import PaymentMethod, SaleStatus, SupplyType
 # ─── Sale Item ────────────────────────────────────────────────────────────────
 
 class SaleItemCreate(BaseModel):
-    variant_id:  Optional[int] = None
-    product_id:  Optional[int] = None
+    variant_id:  int | None = None
+    product_id:  int | None = None
     qty:         Decimal = Field(..., gt=0)
-    unit_price:  Optional[Decimal] = Field(None, gt=0)   # override product price
+    unit_price:  Decimal | None = Field(None, gt=0)   # override product price
     discount:    Decimal = Field(default=Decimal("0"), ge=0)
-    hsn_code:    Optional[str] = None                    # override product HSN
+    hsn_code:    str | None = None                    # override product HSN
 
     @model_validator(mode="after")
     def require_product_or_variant(self):
@@ -44,7 +43,7 @@ class GSTComponentOut(BaseModel):
     cess_amount:   Decimal
     total_tax:     Decimal
     supply_type:   str
-    hsn_code:      Optional[str]
+    hsn_code:      str | None
     model_config = {"from_attributes": True}
 
 
@@ -54,16 +53,16 @@ class SaleItemOut(BaseModel):
     variant_id:    int
     product_name:  str
     variant_name:  str
-    hsn_code:      Optional[str]
+    hsn_code:      str | None
     qty:           Decimal
     unit:          str
     unit_price:    Decimal
     cost_price:    Decimal
-    mrp:           Optional[Decimal]
+    mrp:           Decimal | None
     discount:      Decimal
     taxable_value: Decimal
     line_total:    Decimal
-    gst_component: Optional[GSTComponentOut] = None
+    gst_component: GSTComponentOut | None = None
     model_config = {"from_attributes": True}
 
 
@@ -72,15 +71,15 @@ class SaleItemOut(BaseModel):
 class PaymentSplit(BaseModel):
     method:    PaymentMethod
     amount:    Decimal = Field(..., gt=0)
-    reference: Optional[str] = None   # UPI txn ID, card last4, etc.
+    reference: str | None = None   # UPI txn ID, card last4, etc.
 
 
 class SalePaymentOut(BaseModel):
     id:             int
     method:         PaymentMethod
     amount:         Decimal
-    reference:      Optional[str]
-    gateway_status: Optional[str]
+    reference:      str | None
+    gateway_status: str | None
     created_at:     datetime
     model_config = {"from_attributes": True}
 
@@ -89,14 +88,14 @@ class SalePaymentOut(BaseModel):
 
 class CreateSaleRequest(BaseModel):
     store_id:         int
-    customer_id:      Optional[int]        = None
-    items:            List[SaleItemCreate] = Field(..., min_length=1)
+    customer_id:      int | None        = None
+    items:            list[SaleItemCreate] = Field(..., min_length=1)
     payment_method:   PaymentMethod        = PaymentMethod.CASH
     overall_discount: Decimal              = Field(default=Decimal("0"), ge=0)
-    amount_paid:      Optional[Decimal]    = Field(None, ge=0)
-    payment_splits:   Optional[List[PaymentSplit]] = None
-    notes:            Optional[str]        = None
-    local_id:         Optional[str]        = None   # Device UUID for offline dedup
+    amount_paid:      Decimal | None    = Field(None, ge=0)
+    payment_splits:   list[PaymentSplit] | None = None
+    notes:            str | None        = None
+    local_id:         str | None        = None   # Device UUID for offline dedup
 
     @field_validator("payment_splits")
     @classmethod
@@ -112,12 +111,12 @@ class SaleOut(BaseModel):
     id:              int
     store_id:        int
     cashier_id:      int
-    customer_id:     Optional[int]
+    customer_id:     int | None
     invoice_number:  str
     invoice_date:    datetime
     supply_type:     SupplyType
     is_b2b:          bool
-    customer_gstin:  Optional[str]
+    customer_gstin:  str | None
 
     # Amounts
     subtotal:        Decimal
@@ -135,12 +134,12 @@ class SaleOut(BaseModel):
     amount_paid:     Decimal
     amount_due:      Decimal
     status:          SaleStatus
-    notes:           Optional[str]
+    notes:           str | None
     is_synced:       bool
-    invoice_pdf_url: Optional[str]
+    invoice_pdf_url: str | None
 
-    items:    List[SaleItemOut]    = []
-    payments: List[SalePaymentOut] = []
+    items:    list[SaleItemOut]    = []
+    payments: list[SalePaymentOut] = []
 
     created_at: datetime
     model_config = {"from_attributes": True}
@@ -155,9 +154,9 @@ class GSTINValidateRequest(BaseModel):
 class GSTINValidateResponse(BaseModel):
     gstin:      str
     is_valid:   bool
-    state_code: Optional[str]
-    state_name: Optional[str]
-    error:      Optional[str]
+    state_code: str | None
+    state_name: str | None
+    error:      str | None
 
 
 # ─── Tax Preview ──────────────────────────────────────────────────────────────
@@ -168,8 +167,8 @@ class TaxPreviewRequest(BaseModel):
     Used by the frontend to show live tax breakdown as items are added.
     """
     store_id:        int
-    customer_id:     Optional[int]     = None
-    items:           List[SaleItemCreate]
+    customer_id:     int | None     = None
+    items:           list[SaleItemCreate]
     overall_discount: Decimal          = Decimal("0")
 
 
@@ -185,7 +184,7 @@ class TaxPreviewItemOut(BaseModel):
 
 class TaxPreviewResponse(BaseModel):
     supply_type:    str
-    items:          List[TaxPreviewItemOut]
+    items:          list[TaxPreviewItemOut]
     subtotal:       Decimal
     total_discount: Decimal
     taxable_amount: Decimal
@@ -205,7 +204,7 @@ class OfflineSyncPayload(BaseModel):
     device_id:  str
     store_id:   int
     synced_at:  datetime
-    sales:      List[CreateSaleRequest] = []
+    sales:      list[CreateSaleRequest] = []
 
 
 class OfflineSyncResponse(BaseModel):
@@ -213,5 +212,5 @@ class OfflineSyncResponse(BaseModel):
     synced:        int
     skipped:       int   # duplicate local_id
     failed:        int
-    invoices:      List[str]          # Successfully created invoice numbers
-    errors:        List[dict]         # {local_id, error}
+    invoices:      list[str]          # Successfully created invoice numbers
+    errors:        list[dict]         # {local_id, error}

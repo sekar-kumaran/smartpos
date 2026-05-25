@@ -14,9 +14,8 @@ Key upgrades over skeleton:
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from decimal import ROUND_HALF_UP, Decimal
-from typing import Optional
 
 from fastapi import HTTPException
 from sqlalchemy import func, select
@@ -45,11 +44,11 @@ class BillingService:
     async def _next_invoice_number(
         self, db: AsyncSession, store_id: int
     ) -> str:
-        today = datetime.now(timezone.utc).strftime("%Y%m%d")
+        today = datetime.now(datetime.UTC).strftime("%Y%m%d")
         result = await db.execute(
             select(func.count(Sale.id)).where(
                 Sale.store_id == store_id,
-                func.date(Sale.created_at) == datetime.now(timezone.utc).date(),
+                func.date(Sale.created_at) == datetime.now(datetime.UTC).date(),
             )
         )
         count = (result.scalar() or 0) + 1
@@ -64,12 +63,12 @@ class BillingService:
         cashier_id: int,
         items: list[dict],
         payment_method: PaymentMethod,
-        customer_id: Optional[int] = None,
+        customer_id: int | None = None,
         overall_discount: Decimal = Decimal("0"),
-        amount_paid: Optional[Decimal] = None,
-        notes: Optional[str] = None,
-        local_id: Optional[str] = None,
-        payment_splits: Optional[list[dict]] = None,
+        amount_paid: Decimal | None = None,
+        notes: str | None = None,
+        local_id: str | None = None,
+        payment_splits: list[dict] | None = None,
     ) -> Sale:
         """
         Create a complete GST-compliant sale.
@@ -97,7 +96,7 @@ class BillingService:
         customer = None
         customer_state = None
         customer_gstin = None
-        price_category_id: Optional[int] = None
+        price_category_id: int | None = None
         # tier_prices: product_id -> Decimal (pre-fetched to avoid N+1)
         tier_prices: dict[int, Decimal] = {}
 
@@ -329,7 +328,7 @@ class BillingService:
         if customer:
             customer.total_purchases  += 1
             customer.total_spent      += total_amount
-            customer.last_purchase_at  = datetime.now(timezone.utc)
+            customer.last_purchase_at  = datetime.now(datetime.UTC)
 
         await db.flush()
         logger.info(
@@ -390,9 +389,9 @@ class BillingService:
         self,
         db: AsyncSession,
         store_id: int,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-        customer_id: Optional[int] = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        customer_id: int | None = None,
         page: int = 1,
         page_size: int = 50,
     ) -> tuple[list[Sale], int]:

@@ -14,14 +14,21 @@ Schema principles:
 from __future__ import annotations
 
 import enum
-from datetime import datetime, timezone
+from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional
 
 from sqlalchemy import (
-    Boolean, Date, DateTime, Enum, ForeignKey,
-    Integer, Numeric, String, Text, UniqueConstraint,
-    CheckConstraint, Index, JSON,
+    Boolean,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Index,
+    Integer,
+    JSON,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -31,7 +38,7 @@ from app.core.database import Base
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
 def utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(datetime.UTC)
 
 
 # ─── Enums ────────────────────────────────────────────────────────────────────
@@ -157,42 +164,42 @@ class Store(Base):
 
     id:          Mapped[int]       = mapped_column(Integer, primary_key=True)
     name:        Mapped[str]       = mapped_column(String(200), nullable=False)
-    legal_name:  Mapped[Optional[str]] = mapped_column(String(200))
+    legal_name:  Mapped[str | None] = mapped_column(String(200))
     store_type:  Mapped[StoreType] = mapped_column(Enum(StoreType), default=StoreType.RETAIL)
-    address:     Mapped[Optional[str]] = mapped_column(Text)
-    city:        Mapped[Optional[str]] = mapped_column(String(100))
+    address:     Mapped[str | None] = mapped_column(Text)
+    city:        Mapped[str | None] = mapped_column(String(100))
     state_code:  Mapped[str]       = mapped_column(String(3), default="29")
-    pincode:     Mapped[Optional[str]] = mapped_column(String(10))
-    phone:       Mapped[Optional[str]] = mapped_column(String(20))
-    email:       Mapped[Optional[str]] = mapped_column(String(255))
+    pincode:     Mapped[str | None] = mapped_column(String(10))
+    phone:       Mapped[str | None] = mapped_column(String(20))
+    email:       Mapped[str | None] = mapped_column(String(255))
     currency:    Mapped[str]       = mapped_column(String(5), default="INR")
 
     # GST details
-    gstin:           Mapped[Optional[str]] = mapped_column(String(20))
+    gstin:           Mapped[str | None] = mapped_column(String(20))
     gst_regime:      Mapped[GSTRegimeType] = mapped_column(Enum(GSTRegimeType), default=GSTRegimeType.REGULAR)
-    pan_number:      Mapped[Optional[str]] = mapped_column(String(15))
-    fssai_number:    Mapped[Optional[str]] = mapped_column(String(20))
-    drug_license_no: Mapped[Optional[str]] = mapped_column(String(30))
+    pan_number:      Mapped[str | None] = mapped_column(String(15))
+    fssai_number:    Mapped[str | None] = mapped_column(String(20))
+    drug_license_no: Mapped[str | None] = mapped_column(String(30))
 
     # Branding
-    logo_url:    Mapped[Optional[str]] = mapped_column(String(500))
-    receipt_header: Mapped[Optional[str]] = mapped_column(Text)
-    receipt_footer: Mapped[Optional[str]] = mapped_column(Text)
+    logo_url:    Mapped[str | None] = mapped_column(String(500))
+    receipt_header: Mapped[str | None] = mapped_column(Text)
+    receipt_footer: Mapped[str | None] = mapped_column(Text)
 
     # SaaS
     plan:        Mapped[str]  = mapped_column(String(30), default="free")
     is_active:   Mapped[bool] = mapped_column(Boolean, default=True)
-    trial_ends:  Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    trial_ends:  Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     created_at:  Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at:  Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
     # Relationships
-    users:     Mapped[List["User"]]     = relationship(back_populates="store")
-    products:  Mapped[List["Product"]]  = relationship(back_populates="store")
-    customers: Mapped[List["Customer"]] = relationship(back_populates="store")
-    sales:     Mapped[List["Sale"]]     = relationship(back_populates="store")
-    branches:  Mapped[List["Branch"]]   = relationship(back_populates="store")
+    users:     Mapped[list["User"]]     = relationship(back_populates="store")
+    products:  Mapped[list["Product"]]  = relationship(back_populates="store")
+    customers: Mapped[list["Customer"]] = relationship(back_populates="store")
+    sales:     Mapped[list["Sale"]]     = relationship(back_populates="store")
+    branches:  Mapped[list["Branch"]]   = relationship(back_populates="store")
 
 
 class Branch(Base):
@@ -202,8 +209,8 @@ class Branch(Base):
     id:        Mapped[int]  = mapped_column(Integer, primary_key=True)
     store_id:  Mapped[int]  = mapped_column(ForeignKey("stores.id"), nullable=False)
     name:      Mapped[str]  = mapped_column(String(150), nullable=False)
-    address:   Mapped[Optional[str]] = mapped_column(Text)
-    phone:     Mapped[Optional[str]] = mapped_column(String(20))
+    address:   Mapped[str | None] = mapped_column(Text)
+    phone:     Mapped[str | None] = mapped_column(String(20))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_main:   Mapped[bool] = mapped_column(Boolean, default=False)
 
@@ -220,26 +227,26 @@ class User(Base):
     __tablename__ = "users"
 
     id:            Mapped[int]      = mapped_column(Integer, primary_key=True)
-    store_id:      Mapped[Optional[int]] = mapped_column(ForeignKey("stores.id"))
+    store_id:      Mapped[int | None] = mapped_column(ForeignKey("stores.id"))
     name:          Mapped[str]      = mapped_column(String(150), nullable=False)
     email:         Mapped[str]      = mapped_column(String(255), unique=True, nullable=False)
-    phone:         Mapped[Optional[str]] = mapped_column(String(20))
+    phone:         Mapped[str | None] = mapped_column(String(20))
     password_hash: Mapped[str]      = mapped_column(String(255), nullable=False)
     role:          Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.CASHIER)
     is_active:     Mapped[bool]     = mapped_column(Boolean, default=True)
     is_verified:   Mapped[bool]     = mapped_column(Boolean, default=False)
-    avatar_url:    Mapped[Optional[str]] = mapped_column(String(500))
-    last_login_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    avatar_url:    Mapped[str | None] = mapped_column(String(500))
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     # OTP / 2FA
-    otp_hash:    Mapped[Optional[str]]      = mapped_column(String(255))
-    otp_expires: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    otp_hash:    Mapped[str | None]      = mapped_column(String(255))
+    otp_expires: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
-    store: Mapped[Optional["Store"]] = relationship(back_populates="users")
-    sales: Mapped[List["Sale"]]      = relationship(back_populates="cashier")
+    store: Mapped["Store" | None] = relationship(back_populates="users")
+    sales: Mapped[list["Sale"]]      = relationship(back_populates="cashier")
 
     __table_args__ = (
         Index("ix_users_store_id", "store_id"),
@@ -281,7 +288,7 @@ class GSTTaxComponent(Base):
     id:           Mapped[int]        = mapped_column(Integer, primary_key=True)
     sale_item_id: Mapped[int]        = mapped_column(ForeignKey("sale_items.id"), nullable=False)
     supply_type:  Mapped[SupplyType] = mapped_column(Enum(SupplyType), nullable=False)
-    hsn_code:     Mapped[Optional[str]] = mapped_column(String(10))
+    hsn_code:     Mapped[str | None] = mapped_column(String(10))
     taxable_value:Mapped[Decimal]    = mapped_column(Numeric(14, 2), nullable=False)
 
     # CGST + SGST (intra-state) OR IGST (inter-state) — one set will be zero
@@ -316,11 +323,11 @@ class Category(Base):
     id:       Mapped[int]  = mapped_column(Integer, primary_key=True)
     store_id: Mapped[int]  = mapped_column(ForeignKey("stores.id"), nullable=False)
     name:     Mapped[str]  = mapped_column(String(120), nullable=False)
-    parent_id: Mapped[Optional[int]] = mapped_column(ForeignKey("categories.id"))
+    parent_id: Mapped[int | None] = mapped_column(ForeignKey("categories.id"))
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
 
-    products:  Mapped[List["Product"]]  = relationship(back_populates="category")
-    children:  Mapped[List["Category"]] = relationship()
+    products:  Mapped[list["Product"]]  = relationship(back_populates="category")
+    children:  Mapped[list["Category"]] = relationship()
     __table_args__ = (UniqueConstraint("store_id", "name"),)
 
 
@@ -334,21 +341,21 @@ class Product(Base):
 
     id:          Mapped[int]  = mapped_column(Integer, primary_key=True)
     store_id:    Mapped[int]  = mapped_column(ForeignKey("stores.id"), nullable=False)
-    category_id: Mapped[Optional[int]] = mapped_column(ForeignKey("categories.id"))
+    category_id: Mapped[int | None] = mapped_column(ForeignKey("categories.id"))
     name:        Mapped[str]  = mapped_column(String(250), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text)
-    brand:       Mapped[Optional[str]] = mapped_column(String(120))
-    image_url:   Mapped[Optional[str]] = mapped_column(String(500))
+    description: Mapped[str | None] = mapped_column(Text)
+    brand:       Mapped[str | None] = mapped_column(String(120))
+    image_url:   Mapped[str | None] = mapped_column(String(500))
 
     # Barcodes / lookup
-    sku:          Mapped[Optional[str]] = mapped_column(String(100))
-    default_barcode: Mapped[Optional[str]] = mapped_column(String(100))
-    hsn_code:    Mapped[Optional[str]] = mapped_column(String(10))  # FK to hsn_codes.hsn_code
+    sku:          Mapped[str | None] = mapped_column(String(100))
+    default_barcode: Mapped[str | None] = mapped_column(String(100))
+    hsn_code:    Mapped[str | None] = mapped_column(String(10))  # FK to hsn_codes.hsn_code
 
     # Pricing (defaults; variants can override)
     cost_price:    Mapped[Decimal] = mapped_column(Numeric(14, 4), nullable=False)
     selling_price: Mapped[Decimal] = mapped_column(Numeric(14, 4), nullable=False)
-    mrp:           Mapped[Optional[Decimal]] = mapped_column(Numeric(14, 4))
+    mrp:           Mapped[Decimal | None] = mapped_column(Numeric(14, 4))
 
     # GST
     gst_rate:    Mapped[GSTTaxSlab] = mapped_column(Enum(GSTTaxSlab), default=GSTTaxSlab.SLAB_18)
@@ -366,16 +373,16 @@ class Product(Base):
     has_variants:  Mapped[bool] = mapped_column(Boolean, default=False)
 
     is_active:    Mapped[bool]     = mapped_column(Boolean, default=True)
-    created_by_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
+    created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     created_at:   Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at:   Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
     store:    Mapped["Store"]              = relationship(back_populates="products")
-    category: Mapped[Optional["Category"]] = relationship(back_populates="products")
-    variants: Mapped[List["ProductVariant"]] = relationship(
+    category: Mapped["Category" | None] = relationship(back_populates="products")
+    variants: Mapped[list["ProductVariant"]] = relationship(
         back_populates="product", cascade="all, delete-orphan"
     )
-    suppliers: Mapped[List["ProductSupplier"]] = relationship(back_populates="product")
+    suppliers: Mapped[list["ProductSupplier"]] = relationship(back_populates="product")
 
     __table_args__ = (
         Index("ix_products_store_id",  "store_id"),
@@ -397,32 +404,32 @@ class ProductVariant(Base):
     product_id:  Mapped[int]     = mapped_column(ForeignKey("products.id"), nullable=False)
     store_id:    Mapped[int]     = mapped_column(ForeignKey("stores.id"), nullable=False)
     variant_name: Mapped[str]    = mapped_column(String(200), nullable=False, default="Default")
-    barcode:     Mapped[Optional[str]] = mapped_column(String(100))
-    sku:         Mapped[Optional[str]] = mapped_column(String(100))
+    barcode:     Mapped[str | None] = mapped_column(String(100))
+    sku:         Mapped[str | None] = mapped_column(String(100))
 
     # Variant-specific pricing (overrides product defaults if set)
-    cost_price:    Mapped[Optional[Decimal]] = mapped_column(Numeric(14, 4))
-    selling_price: Mapped[Optional[Decimal]] = mapped_column(Numeric(14, 4))
-    mrp:           Mapped[Optional[Decimal]] = mapped_column(Numeric(14, 4))
+    cost_price:    Mapped[Decimal | None] = mapped_column(Numeric(14, 4))
+    selling_price: Mapped[Decimal | None] = mapped_column(Numeric(14, 4))
+    mrp:           Mapped[Decimal | None] = mapped_column(Numeric(14, 4))
 
     # Variant attributes (stored as key-value)
-    attributes: Mapped[Optional[dict]] = mapped_column(JSON)
+    attributes: Mapped[dict | None] = mapped_column(JSON)
     # e.g. {"size": "L", "colour": "Red", "weight": "500g"}
 
     # Current stock (sum of all active batches; maintained by triggers/service)
     stock_qty:    Mapped[Decimal]  = mapped_column(Numeric(12, 3), default=0)
     is_active:    Mapped[bool]     = mapped_column(Boolean, default=True)
-    image_url:    Mapped[Optional[str]] = mapped_column(String(500))
+    image_url:    Mapped[str | None] = mapped_column(String(500))
 
     sort_order:   Mapped[int]      = mapped_column(Integer, default=0)
     created_at:   Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     product: Mapped["Product"]          = relationship(back_populates="variants")
-    batches: Mapped[List["StockBatch"]] = relationship(
+    batches: Mapped[list["StockBatch"]] = relationship(
         back_populates="variant", cascade="all, delete-orphan",
         order_by="StockBatch.expiry_date"
     )
-    sale_items: Mapped[List["SaleItem"]] = relationship(back_populates="variant")
+    sale_items: Mapped[list["SaleItem"]] = relationship(back_populates="variant")
 
     __table_args__ = (
         Index("ix_variant_product",  "product_id"),
@@ -449,22 +456,22 @@ class StockBatch(Base):
 
     # Costing
     purchase_price: Mapped[Decimal] = mapped_column(Numeric(14, 4), nullable=False)
-    mrp:            Mapped[Optional[Decimal]] = mapped_column(Numeric(14, 4))
+    mrp:            Mapped[Decimal | None] = mapped_column(Numeric(14, 4))
 
     # Dates
-    manufacture_date: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
-    expiry_date:      Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    manufacture_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    expiry_date:      Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     received_at:      Mapped[datetime]           = mapped_column(DateTime(timezone=True), default=utcnow)
 
     # Purchase Order link
-    po_item_id:  Mapped[Optional[int]] = mapped_column(ForeignKey("purchase_order_items.id"))
-    supplier_id: Mapped[Optional[int]] = mapped_column(ForeignKey("suppliers.id"))
+    po_item_id:  Mapped[int | None] = mapped_column(ForeignKey("purchase_order_items.id"))
+    supplier_id: Mapped[int | None] = mapped_column(ForeignKey("suppliers.id"))
 
     is_active:   Mapped[bool] = mapped_column(Boolean, default=True)
 
     variant:  Mapped["ProductVariant"]           = relationship(back_populates="batches")
-    po_item:  Mapped[Optional["PurchaseOrderItem"]] = relationship()
-    supplier: Mapped[Optional["Supplier"]]       = relationship()
+    po_item:  Mapped["PurchaseOrderItem" | None] = relationship()
+    supplier: Mapped["Supplier" | None]       = relationship()
 
     __table_args__ = (
         Index("ix_batch_variant",  "variant_id"),
@@ -483,7 +490,7 @@ class StockMovement(Base):
     id:           Mapped[int]               = mapped_column(Integer, primary_key=True)
     store_id:     Mapped[int]               = mapped_column(ForeignKey("stores.id"), nullable=False)
     variant_id:   Mapped[int]               = mapped_column(ForeignKey("product_variants.id"), nullable=False)
-    batch_id:     Mapped[Optional[int]]     = mapped_column(ForeignKey("stock_batches.id"))
+    batch_id:     Mapped[int | None]     = mapped_column(ForeignKey("stock_batches.id"))
     movement_type:Mapped[StockMovementType] = mapped_column(Enum(StockMovementType), nullable=False)
 
     qty_before:   Mapped[Decimal]  = mapped_column(Numeric(12, 3), nullable=False)
@@ -491,12 +498,12 @@ class StockMovement(Base):
     qty_after:    Mapped[Decimal]  = mapped_column(Numeric(12, 3), nullable=False)
 
     # Reference to source document
-    reference_type: Mapped[Optional[str]] = mapped_column(String(50))  # "sale", "purchase_order", "adjustment"
-    reference_id:   Mapped[Optional[int]] = mapped_column(Integer)
+    reference_type: Mapped[str | None] = mapped_column(String(50))  # "sale", "purchase_order", "adjustment"
+    reference_id:   Mapped[int | None] = mapped_column(Integer)
 
-    unit_cost:  Mapped[Optional[Decimal]] = mapped_column(Numeric(14, 4))
-    reason:     Mapped[Optional[str]]     = mapped_column(Text)
-    created_by_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
+    unit_cost:  Mapped[Decimal | None] = mapped_column(Numeric(14, 4))
+    reason:     Mapped[str | None]     = mapped_column(Text)
+    created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime]         = mapped_column(DateTime(timezone=True), default=utcnow)
 
     __table_args__ = (
@@ -516,11 +523,11 @@ class Supplier(Base):
     id:        Mapped[int]  = mapped_column(Integer, primary_key=True)
     store_id:  Mapped[int]  = mapped_column(ForeignKey("stores.id"), nullable=False)
     name:      Mapped[str]  = mapped_column(String(200), nullable=False)
-    contact_person: Mapped[Optional[str]] = mapped_column(String(150))
-    phone:     Mapped[Optional[str]] = mapped_column(String(20))
-    email:     Mapped[Optional[str]] = mapped_column(String(255))
-    address:   Mapped[Optional[str]] = mapped_column(Text)
-    gstin:     Mapped[Optional[str]] = mapped_column(String(20))
+    contact_person: Mapped[str | None] = mapped_column(String(150))
+    phone:     Mapped[str | None] = mapped_column(String(20))
+    email:     Mapped[str | None] = mapped_column(String(255))
+    address:   Mapped[str | None] = mapped_column(Text)
+    gstin:     Mapped[str | None] = mapped_column(String(20))
     credit_days: Mapped[int] = mapped_column(Integer, default=30)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
@@ -533,8 +540,8 @@ class ProductSupplier(Base):
     id:          Mapped[int]     = mapped_column(Integer, primary_key=True)
     product_id:  Mapped[int]     = mapped_column(ForeignKey("products.id"), nullable=False)
     supplier_id: Mapped[int]     = mapped_column(ForeignKey("suppliers.id"), nullable=False)
-    supplier_sku: Mapped[Optional[str]] = mapped_column(String(100))
-    last_price:   Mapped[Optional[Decimal]] = mapped_column(Numeric(14, 4))
+    supplier_sku: Mapped[str | None] = mapped_column(String(100))
+    last_price:   Mapped[Decimal | None] = mapped_column(Numeric(14, 4))
     lead_days:    Mapped[int]    = mapped_column(Integer, default=7)
     is_preferred: Mapped[bool]   = mapped_column(Boolean, default=False)
 
@@ -556,16 +563,16 @@ class PurchaseOrder(Base):
     tax_amount:  Mapped[Decimal]  = mapped_column(Numeric(14, 2), default=0)
     total_amount:Mapped[Decimal]  = mapped_column(Numeric(14, 2), default=0)
 
-    expected_date: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
-    received_date: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
-    notes:         Mapped[Optional[str]]      = mapped_column(Text)
+    expected_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    received_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    notes:         Mapped[str | None]      = mapped_column(Text)
 
     created_by_id: Mapped[int]  = mapped_column(ForeignKey("users.id"), nullable=False)
     created_at:    Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at:    Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
     supplier: Mapped["Supplier"]               = relationship()
-    items:    Mapped[List["PurchaseOrderItem"]] = relationship(
+    items:    Mapped[list["PurchaseOrderItem"]] = relationship(
         back_populates="po", cascade="all, delete-orphan"
     )
     __table_args__ = (Index("ix_po_store", "store_id"),)
@@ -597,21 +604,21 @@ class Customer(Base):
     id:        Mapped[int]  = mapped_column(Integer, primary_key=True)
     store_id:  Mapped[int]  = mapped_column(ForeignKey("stores.id"), nullable=False)
     name:      Mapped[str]  = mapped_column(String(200), nullable=False)
-    phone:     Mapped[Optional[str]] = mapped_column(String(20))
-    email:     Mapped[Optional[str]] = mapped_column(String(255))
-    address:   Mapped[Optional[str]] = mapped_column(Text)
-    gstin:     Mapped[Optional[str]] = mapped_column(String(20))
-    state_code: Mapped[Optional[str]] = mapped_column(String(3))  # for IGST calc
+    phone:     Mapped[str | None] = mapped_column(String(20))
+    email:     Mapped[str | None] = mapped_column(String(255))
+    address:   Mapped[str | None] = mapped_column(Text)
+    gstin:     Mapped[str | None] = mapped_column(String(20))
+    state_code: Mapped[str | None] = mapped_column(String(3))  # for IGST calc
 
     # Price tier — e.g. "Hotel", "Wholesale" (overrides default product prices)
-    price_category_id: Mapped[Optional[int]] = mapped_column(ForeignKey("price_categories.id"), nullable=True)
+    price_category_id: Mapped[int | None] = mapped_column(ForeignKey("price_categories.id"), nullable=True)
 
     # Analytics cache (updated by background task)
     total_purchases:    Mapped[int]     = mapped_column(Integer, default=0)
     total_spent:        Mapped[Decimal] = mapped_column(Numeric(16, 2), default=0)
     total_credit_given: Mapped[Decimal] = mapped_column(Numeric(16, 2), default=0)
     total_credit_repaid:Mapped[Decimal] = mapped_column(Numeric(16, 2), default=0)
-    last_purchase_at:   Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    last_purchase_at:   Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     loyalty_points:     Mapped[int]     = mapped_column(Integer, default=0)
 
     is_active:  Mapped[bool]     = mapped_column(Boolean, default=True)
@@ -623,9 +630,9 @@ class Customer(Base):
         return self.total_credit_given - self.total_credit_repaid
 
     store:          Mapped["Store"]                    = relationship(back_populates="customers")
-    credits:        Mapped[List["Credit"]]             = relationship(back_populates="customer")
-    sales:          Mapped[List["Sale"]]               = relationship(back_populates="customer")
-    price_category: Mapped[Optional["PriceCategory"]] = relationship(foreign_keys=[price_category_id])
+    credits:        Mapped[list["Credit"]]             = relationship(back_populates="customer")
+    sales:          Mapped[list["Sale"]]               = relationship(back_populates="customer")
+    price_category: Mapped["PriceCategory" | None] = relationship(foreign_keys=[price_category_id])
 
     __table_args__ = (
         Index("ix_customer_store", "store_id"),
@@ -642,16 +649,16 @@ class Sale(Base):
 
     id:             Mapped[int]          = mapped_column(Integer, primary_key=True)
     store_id:       Mapped[int]          = mapped_column(ForeignKey("stores.id"), nullable=False)
-    branch_id:      Mapped[Optional[int]]= mapped_column(ForeignKey("branches.id"))
+    branch_id:      Mapped[int | None]= mapped_column(ForeignKey("branches.id"))
     cashier_id:     Mapped[int]          = mapped_column(ForeignKey("users.id"), nullable=False)
-    customer_id:    Mapped[Optional[int]]= mapped_column(ForeignKey("customers.id"))
+    customer_id:    Mapped[int | None]= mapped_column(ForeignKey("customers.id"))
     invoice_number: Mapped[str]          = mapped_column(String(60), unique=True, nullable=False)
     invoice_date:   Mapped[datetime]     = mapped_column(DateTime(timezone=True), default=utcnow)
 
     # GST invoice type
     supply_type:   Mapped[SupplyType]    = mapped_column(Enum(SupplyType), default=SupplyType.INTRA_STATE)
     is_b2b:        Mapped[bool]          = mapped_column(Boolean, default=False)
-    customer_gstin: Mapped[Optional[str]] = mapped_column(String(20))
+    customer_gstin: Mapped[str | None] = mapped_column(String(20))
 
     # Amounts
     subtotal:      Mapped[Decimal]       = mapped_column(Numeric(14, 2), nullable=False)
@@ -669,31 +676,31 @@ class Sale(Base):
     payment_method: Mapped[PaymentMethod]= mapped_column(Enum(PaymentMethod))
     amount_paid:    Mapped[Decimal]      = mapped_column(Numeric(14, 2), default=0)
     amount_due:     Mapped[Decimal]      = mapped_column(Numeric(14, 2), default=0)
-    payment_ref:    Mapped[Optional[str]]= mapped_column(String(100))  # UPI txn id, etc.
+    payment_ref:    Mapped[str | None]= mapped_column(String(100))  # UPI txn id, etc.
 
     status:     Mapped[SaleStatus]       = mapped_column(Enum(SaleStatus), default=SaleStatus.COMPLETED)
-    notes:      Mapped[Optional[str]]    = mapped_column(Text)
+    notes:      Mapped[str | None]    = mapped_column(Text)
 
     # Shift tracking
-    shift_id:      Mapped[Optional[int]] = mapped_column(ForeignKey("shift_sessions.id"), nullable=True)
-    price_category_id: Mapped[Optional[int]] = mapped_column(ForeignKey("price_categories.id"), nullable=True)
+    shift_id:      Mapped[int | None] = mapped_column(ForeignKey("shift_sessions.id"), nullable=True)
+    price_category_id: Mapped[int | None] = mapped_column(ForeignKey("price_categories.id"), nullable=True)
 
     # Offline sync
     is_synced:  Mapped[bool]             = mapped_column(Boolean, default=True)
-    local_id:   Mapped[Optional[str]]    = mapped_column(String(60), unique=True)
+    local_id:   Mapped[str | None]    = mapped_column(String(60), unique=True)
 
     # PDF
-    invoice_pdf_url: Mapped[Optional[str]] = mapped_column(String(500))
+    invoice_pdf_url: Mapped[str | None] = mapped_column(String(500))
 
     created_at: Mapped[datetime]         = mapped_column(DateTime(timezone=True), default=utcnow)
 
     store:    Mapped["Store"]                 = relationship(back_populates="sales")
     cashier:  Mapped["User"]                  = relationship(back_populates="sales")
-    customer: Mapped[Optional["Customer"]]    = relationship(back_populates="sales")
-    items:    Mapped[List["SaleItem"]]         = relationship(
+    customer: Mapped["Customer" | None]    = relationship(back_populates="sales")
+    items:    Mapped[list["SaleItem"]]         = relationship(
         back_populates="sale", cascade="all, delete-orphan"
     )
-    payments: Mapped[List["SalePayment"]]     = relationship(
+    payments: Mapped[list["SalePayment"]]     = relationship(
         back_populates="sale", cascade="all, delete-orphan"
     )
 
@@ -711,23 +718,23 @@ class SaleItem(Base):
     sale_id:     Mapped[int]     = mapped_column(ForeignKey("sales.id"), nullable=False)
     product_id:  Mapped[int]     = mapped_column(ForeignKey("products.id"), nullable=False)
     variant_id:  Mapped[int]     = mapped_column(ForeignKey("product_variants.id"), nullable=False)
-    batch_id:    Mapped[Optional[int]] = mapped_column(ForeignKey("stock_batches.id"))
+    batch_id:    Mapped[int | None] = mapped_column(ForeignKey("stock_batches.id"))
 
     # Snapshot at time of sale (immutable after creation)
     product_name:  Mapped[str]     = mapped_column(String(250), nullable=False)
-    hsn_code:      Mapped[Optional[str]] = mapped_column(String(10))
+    hsn_code:      Mapped[str | None] = mapped_column(String(10))
     variant_name:  Mapped[str]     = mapped_column(String(200), default="Default")
     qty:           Mapped[Decimal] = mapped_column(Numeric(12, 3), nullable=False)
     unit:          Mapped[str]     = mapped_column(String(20), default="pcs")
     unit_price:    Mapped[Decimal] = mapped_column(Numeric(14, 4), nullable=False)
     cost_price:    Mapped[Decimal] = mapped_column(Numeric(14, 4), nullable=False)  # for profit calc
-    mrp:           Mapped[Optional[Decimal]] = mapped_column(Numeric(14, 4))
+    mrp:           Mapped[Decimal | None] = mapped_column(Numeric(14, 4))
     discount:      Mapped[Decimal] = mapped_column(Numeric(12, 2), default=0)
     taxable_value: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
     line_total:    Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
 
     # GST breakdown (one-to-one)
-    gst_component: Mapped[Optional["GSTTaxComponent"]] = relationship(
+    gst_component: Mapped["GSTTaxComponent" | None] = relationship(
         back_populates="sale_item", cascade="all, delete-orphan"
     )
 
@@ -745,8 +752,8 @@ class SalePayment(Base):
     sale_id:        Mapped[int]          = mapped_column(ForeignKey("sales.id"), nullable=False)
     method:         Mapped[PaymentMethod]= mapped_column(Enum(PaymentMethod), nullable=False)
     amount:         Mapped[Decimal]      = mapped_column(Numeric(14, 2), nullable=False)
-    reference:      Mapped[Optional[str]]= mapped_column(String(100))
-    gateway_status: Mapped[Optional[str]]= mapped_column(String(50))
+    reference:      Mapped[str | None]= mapped_column(String(100))
+    gateway_status: Mapped[str | None]= mapped_column(String(50))
     created_at:     Mapped[datetime]     = mapped_column(DateTime(timezone=True), default=utcnow)
 
     sale: Mapped["Sale"] = relationship(back_populates="payments")
@@ -762,18 +769,18 @@ class Credit(Base):
     id:           Mapped[int]          = mapped_column(Integer, primary_key=True)
     store_id:     Mapped[int]          = mapped_column(ForeignKey("stores.id"), nullable=False)
     customer_id:  Mapped[int]          = mapped_column(ForeignKey("customers.id"), nullable=False)
-    sale_id:      Mapped[Optional[int]]= mapped_column(ForeignKey("sales.id"))
+    sale_id:      Mapped[int | None]= mapped_column(ForeignKey("sales.id"))
     amount:       Mapped[Decimal]      = mapped_column(Numeric(14, 2), nullable=False)
     amount_repaid:Mapped[Decimal]      = mapped_column(Numeric(14, 2), default=0)
     balance:      Mapped[Decimal]      = mapped_column(Numeric(14, 2), nullable=False)
-    due_date:     Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    due_date:     Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     status:       Mapped[CreditStatus] = mapped_column(Enum(CreditStatus), default=CreditStatus.OPEN)
-    notes:        Mapped[Optional[str]]= mapped_column(Text)
+    notes:        Mapped[str | None]= mapped_column(Text)
     created_at:   Mapped[datetime]     = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at:   Mapped[datetime]     = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
     customer:   Mapped["Customer"]              = relationship(back_populates="credits")
-    repayments: Mapped[List["CreditRepayment"]] = relationship(
+    repayments: Mapped[list["CreditRepayment"]] = relationship(
         back_populates="credit", cascade="all, delete-orphan"
     )
     __table_args__ = (Index("ix_credit_store_customer", "store_id", "customer_id"),)
@@ -786,8 +793,8 @@ class CreditRepayment(Base):
     credit_id:  Mapped[int]          = mapped_column(ForeignKey("credits.id"), nullable=False)
     amount:     Mapped[Decimal]      = mapped_column(Numeric(14, 2), nullable=False)
     method:     Mapped[PaymentMethod]= mapped_column(Enum(PaymentMethod))
-    reference:  Mapped[Optional[str]]= mapped_column(String(100))
-    notes:      Mapped[Optional[str]]= mapped_column(Text)
+    reference:  Mapped[str | None]= mapped_column(String(100))
+    notes:      Mapped[str | None]= mapped_column(Text)
     created_at: Mapped[datetime]     = mapped_column(DateTime(timezone=True), default=utcnow)
 
     credit: Mapped["Credit"] = relationship(back_populates="repayments")
@@ -806,7 +813,7 @@ class BusinessAlert(Base):
     severity:    Mapped[AlertSeverity] = mapped_column(Enum(AlertSeverity), default=AlertSeverity.MEDIUM)
     title:       Mapped[str]           = mapped_column(String(250), nullable=False)
     description: Mapped[str]           = mapped_column(Text, nullable=False)
-    meta:        Mapped[Optional[dict]]= mapped_column(JSON)
+    meta:        Mapped[dict | None]= mapped_column(JSON)
     is_read:     Mapped[bool]          = mapped_column(Boolean, default=False)
     is_resolved: Mapped[bool]          = mapped_column(Boolean, default=False)
     created_at:  Mapped[datetime]      = mapped_column(DateTime(timezone=True), default=utcnow)
@@ -825,14 +832,14 @@ class AuditLog(Base):
 
     id:          Mapped[int]  = mapped_column(Integer, primary_key=True)
     store_id:    Mapped[int]  = mapped_column(ForeignKey("stores.id"), nullable=False)
-    user_id:     Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
+    user_id:     Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     action:      Mapped[str]  = mapped_column(String(100), nullable=False)
     entity_type: Mapped[str]  = mapped_column(String(50), nullable=False)
-    entity_id:   Mapped[Optional[int]] = mapped_column(Integer)
-    old_values:  Mapped[Optional[dict]] = mapped_column(JSON)
-    new_values:  Mapped[Optional[dict]] = mapped_column(JSON)
-    ip_address:  Mapped[Optional[str]]  = mapped_column(String(45))
-    user_agent:  Mapped[Optional[str]]  = mapped_column(String(500))
+    entity_id:   Mapped[int | None] = mapped_column(Integer)
+    old_values:  Mapped[dict | None] = mapped_column(JSON)
+    new_values:  Mapped[dict | None] = mapped_column(JSON)
+    ip_address:  Mapped[str | None]  = mapped_column(String(45))
+    user_agent:  Mapped[str | None]  = mapped_column(String(500))
     created_at:  Mapped[datetime]       = mapped_column(DateTime(timezone=True), default=utcnow)
 
     __table_args__ = (
@@ -851,7 +858,7 @@ class SyncLog(Base):
     records_recv: Mapped[int]  = mapped_column(Integer, default=0)
     conflicts:    Mapped[int]  = mapped_column(Integer, default=0)
     status:       Mapped[str]  = mapped_column(String(20), default="success")
-    error_msg:    Mapped[Optional[str]] = mapped_column(Text)
+    error_msg:    Mapped[str | None] = mapped_column(Text)
     synced_at:    Mapped[datetime]      = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
@@ -871,13 +878,13 @@ class PriceCategory(Base):
     id:          Mapped[int]  = mapped_column(Integer, primary_key=True)
     store_id:    Mapped[int]  = mapped_column(ForeignKey("stores.id"), nullable=False)
     name:        Mapped[str]  = mapped_column(String(100), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(String(300))
+    description: Mapped[str | None] = mapped_column(String(300))
     color:       Mapped[str]  = mapped_column(String(10), default="#6366f1")  # hex for UI badge
     is_default:  Mapped[bool] = mapped_column(Boolean, default=False)         # the standard retail tier
     is_active:   Mapped[bool] = mapped_column(Boolean, default=True)
     created_at:  Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
-    price_tiers: Mapped[List["ProductPriceTier"]] = relationship(
+    price_tiers: Mapped[list["ProductPriceTier"]] = relationship(
         back_populates="price_category", cascade="all, delete-orphan"
     )
 
@@ -927,15 +934,15 @@ class ShiftSession(Base):
     id:            Mapped[int]         = mapped_column(Integer, primary_key=True)
     store_id:      Mapped[int]         = mapped_column(ForeignKey("stores.id"), nullable=False)
     opened_by_id:  Mapped[int]         = mapped_column(ForeignKey("users.id"), nullable=False)
-    closed_by_id:  Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"), nullable=True)
+    closed_by_id:  Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
 
     opened_at:     Mapped[datetime]    = mapped_column(DateTime(timezone=True), default=utcnow)
-    closed_at:     Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    closed_at:     Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     opening_cash:  Mapped[Decimal]     = mapped_column(Numeric(14, 2), default=0)
-    closing_cash:  Mapped[Optional[Decimal]] = mapped_column(Numeric(14, 2), nullable=True)
+    closing_cash:  Mapped[Decimal | None] = mapped_column(Numeric(14, 2), nullable=True)
     # Expected = opening_cash + cash sales during shift
-    expected_cash: Mapped[Optional[Decimal]] = mapped_column(Numeric(14, 2), nullable=True)
+    expected_cash: Mapped[Decimal | None] = mapped_column(Numeric(14, 2), nullable=True)
 
     total_sales:       Mapped[int]     = mapped_column(Integer, default=0)
     total_revenue:     Mapped[Decimal] = mapped_column(Numeric(14, 2), default=0)
@@ -944,11 +951,11 @@ class ShiftSession(Base):
     card_sales:        Mapped[Decimal] = mapped_column(Numeric(14, 2), default=0)
     credit_sales:      Mapped[Decimal] = mapped_column(Numeric(14, 2), default=0)
 
-    notes:         Mapped[Optional[str]] = mapped_column(Text)
+    notes:         Mapped[str | None] = mapped_column(Text)
     status:        Mapped[ShiftStatus]   = mapped_column(Enum(ShiftStatus), default=ShiftStatus.OPEN)
 
     opened_by: Mapped["User"] = relationship(foreign_keys=[opened_by_id])
-    closed_by: Mapped[Optional["User"]] = relationship(foreign_keys=[closed_by_id])
+    closed_by: Mapped["User" | None] = relationship(foreign_keys=[closed_by_id])
 
     __table_args__ = (
         Index("ix_shift_store_status", "store_id", "status"),

@@ -8,9 +8,8 @@ stock movements ledger, and purchase order receiving.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from decimal import Decimal
-from typing import Optional
 
 from fastapi import HTTPException
 from sqlalchemy import func, select
@@ -109,8 +108,8 @@ class InventoryService:
         self,
         db: AsyncSession,
         store_id: int,
-        search: Optional[str] = None,
-        category_id: Optional[int] = None,
+        search: str | None = None,
+        category_id: int | None = None,
         low_stock_only: bool = False,
         page: int = 1,
         page_size: int = 50,
@@ -158,9 +157,9 @@ class InventoryService:
         store_id: int,
         variant_name: str,
         attributes: dict,
-        cost_price: Optional[Decimal] = None,
-        selling_price: Optional[Decimal] = None,
-        barcode: Optional[str] = None,
+        cost_price: Decimal | None = None,
+        selling_price: Decimal | None = None,
+        barcode: str | None = None,
     ) -> ProductVariant:
         product = await self.get_product(db, product_id)
         product.has_variants = True
@@ -189,12 +188,12 @@ class InventoryService:
         batch_number: str,
         quantity: Decimal,
         purchase_price: Decimal,
-        expiry_date: Optional[datetime] = None,
-        manufacture_date: Optional[datetime] = None,
-        mrp: Optional[Decimal] = None,
-        supplier_id: Optional[int] = None,
-        po_item_id: Optional[int] = None,
-        created_by_id: Optional[int] = None,
+        expiry_date: datetime | None = None,
+        manufacture_date: datetime | None = None,
+        mrp: Decimal | None = None,
+        supplier_id: int | None = None,
+        po_item_id: int | None = None,
+        created_by_id: int | None = None,
     ) -> StockBatch:
         """
         Receive a new batch of stock. Creates the batch record
@@ -268,8 +267,8 @@ class InventoryService:
         qty_to_deduct: Decimal,
         store_id: int,
         reference_type: str = "sale",
-        reference_id: Optional[int] = None,
-    ) -> Optional[int]:
+        reference_id: int | None = None,
+    ) -> int | None:
         """
         Deduct stock using FIFO (First In, First Out) by expiry date.
         Returns the batch_id that was deducted from (for SaleItem.batch_id).
@@ -310,7 +309,7 @@ class InventoryService:
                 f"available {variant.stock_qty}",
             )
 
-        first_batch_id: Optional[int] = None
+        first_batch_id: int | None = None
         remaining = qty_to_deduct
 
         if batches:
@@ -441,7 +440,7 @@ class InventoryService:
         self,
         db: AsyncSession,
         store_id: int,
-        variant_id: Optional[int] = None,
+        variant_id: int | None = None,
         page: int = 1,
         page_size: int = 50,
     ) -> tuple[list[StockMovement], int]:
@@ -468,12 +467,12 @@ class InventoryService:
         variant: ProductVariant,
         movement_type: StockMovementType,
         qty_delta: Decimal,
-        batch_id: Optional[int] = None,
-        reference_type: Optional[str] = None,
-        reference_id: Optional[int] = None,
-        unit_cost: Optional[Decimal] = None,
-        reason: Optional[str] = None,
-        created_by_id: Optional[int] = None,
+        batch_id: int | None = None,
+        reference_type: str | None = None,
+        reference_id: int | None = None,
+        unit_cost: Decimal | None = None,
+        reason: str | None = None,
+        created_by_id: int | None = None,
     ) -> StockMovement:
         """Create an immutable stock movement record."""
         qty_before = variant.stock_qty - qty_delta  # Compute before state

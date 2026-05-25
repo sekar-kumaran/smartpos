@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
@@ -46,12 +46,12 @@ def check_expiry_alerts(self):
         from app.core.database import AsyncSessionFactory
         from app.models.models import (
             StockBatch, ProductVariant, Product,
-            BusinessAlert, AlertType, AlertSeverity, Store,
+            BusinessAlert, AlertType, AlertSeverity,
         )
         from sqlalchemy import select
         from sqlalchemy.orm import selectinload
 
-        now        = datetime.now(timezone.utc)
+        now        = datetime.now(datetime.UTC)
         in_7_days  = now + timedelta(days=7)
         in_30_days = now + timedelta(days=30)
 

@@ -1,10 +1,12 @@
 """SmartPOS AI – Billing Routes (Phase 1A) — see services/billing/service.py"""
 from __future__ import annotations
+
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.database import get_db
 from app.core.security import get_current_user_id
 from app.schemas.billing import (
@@ -68,7 +70,7 @@ async def validate_gstin_ep(payload: GSTINValidateRequest, _: int = Depends(get_
     return GSTINValidateResponse(gstin=payload.gstin.upper(), is_valid=is_valid, state_code=sc, state_name=STATE_CODES.get(sc) if sc else None, error=error if not is_valid else None)
 
 @router.get("/sales", response_model=dict)
-async def list_sales(store_id: int = Query(...), start_date: Optional[datetime] = Query(None), end_date: Optional[datetime] = Query(None), customer_id: Optional[int] = Query(None), page: int = Query(1, ge=1), page_size: int = Query(50, ge=1, le=200), _: int = Depends(get_current_user_id), db: AsyncSession = Depends(get_db)):
+async def list_sales(store_id: int = Query(...), start_date: datetime | None = Query(None), end_date: datetime | None = Query(None), customer_id: int | None = Query(None), page: int = Query(1, ge=1), page_size: int = Query(50, ge=1, le=200), _: int = Depends(get_current_user_id), db: AsyncSession = Depends(get_db)):
     sales, total = await _service.list_sales(db, store_id, start_date, end_date, customer_id, page, page_size)
     return {"total": total, "page": page, "page_size": page_size, "items": [SaleOut.model_validate(s) for s in sales]}
 

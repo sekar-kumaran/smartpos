@@ -1,7 +1,7 @@
 """Core configuration for SmartPOS AI Community Edition."""
 
 from functools import lru_cache
-from typing import Any, List, Literal
+from typing import Any, Literal
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -25,8 +25,8 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     AES_ENCRYPTION_KEY: str = "community-demo-aes-key-32-bytes!!"
-    ALLOWED_ORIGINS: List[str] = ["*"]
-    ALLOWED_HOSTS: List[str] = ["*"]
+    ALLOWED_ORIGINS: list[str] = ["*"]
+    ALLOWED_HOSTS: list[str] = ["*"]
 
     DATABASE_URL: str = "postgresql+asyncpg://smartpos:smartpos_demo_password@localhost:5432/smartpos"
     DATABASE_SYNC_URL: str = (

@@ -3,7 +3,7 @@ Open / close shifts, real-time running totals, cash reconciliation report.
 """
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -136,7 +136,7 @@ async def close_shift(
     await _refresh_totals(db, shift)
 
     shift.closed_by_id  = user_id
-    shift.closed_at     = datetime.now(timezone.utc)
+    shift.closed_at     = datetime.now(datetime.UTC)
     shift.closing_cash  = payload.closing_cash
     shift.status        = ShiftStatus.CLOSED
     if payload.notes:

@@ -1,13 +1,11 @@
 """SmartPOS AI – Credit Routes (Phase 1A)"""
 
-from typing import Optional
-
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.security import get_current_user_id
-from sqlalchemy import func, or_, select
 from app.models.models import CreditStatus, Customer, PriceCategory
 from app.schemas.schemas import (
     CreditCreate, CreditOut, RepaymentCreate, CreditExposure, CustomerCreate, CustomerOut,
@@ -49,8 +47,8 @@ async def record_repayment(
 @router.get("/", response_model=dict)
 async def list_credits(
     store_id:    int                    = Query(...),
-    customer_id: Optional[int]         = Query(None),
-    status:      Optional[CreditStatus]= Query(None),
+    customer_id: int | None         = Query(None),
+    status:      CreditStatus | None= Query(None),
     page:        int                    = Query(1, ge=1),
     page_size:   int                    = Query(50, ge=1, le=200),
     _: int = Depends(get_current_user_id),
@@ -71,7 +69,7 @@ async def list_credits(
 @router.get("/customers", response_model=dict)
 async def list_customers(
     store_id:  int           = Query(...),
-    search:    Optional[str] = Query(None),
+    search:    str | None = Query(None),
     page:      int           = Query(1, ge=1),
     page_size: int           = Query(20, ge=1, le=100),
     _: int = Depends(get_current_user_id),

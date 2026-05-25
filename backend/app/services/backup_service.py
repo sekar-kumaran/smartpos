@@ -11,7 +11,7 @@ import gzip
 import json
 import os
 from base64 import b64decode, b64encode
-from datetime import datetime, timezone
+from datetime import datetime
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from fastapi import HTTPException
@@ -44,7 +44,7 @@ class BackupService:
         tables = ["stores", "users", "products", "customers", "sales", "sale_items", "credits"]
         backup_data: dict = {
             "store_id": store_id,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(datetime.UTC).isoformat(),
             "version": "1.0",
             "tables": {},
         }
@@ -67,7 +67,7 @@ class BackupService:
 
         compressed = gzip.compress(json.dumps(backup_data).encode("utf-8"))
         encrypted = self.encrypt(compressed)
-        filename = f"backup_{store_id}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.enc"
+        filename = f"backup_{store_id}_{datetime.now(datetime.UTC).strftime('%Y%m%d_%H%M%S')}.enc"
 
         return {
             "filename": filename,

@@ -5,10 +5,9 @@ Pydantic v2 request/response models.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -20,7 +19,7 @@ from app.models.models import GSTTaxSlab, POStatus, StockMovementType
 class CategoryCreate(BaseModel):
     store_id: int
     name:     str  = Field(..., min_length=1, max_length=120)
-    parent_id: Optional[int] = None
+    parent_id: int | None = None
     sort_order: int = 0
 
 
@@ -28,7 +27,7 @@ class CategoryOut(BaseModel):
     id:         int
     store_id:   int
     name:       str
-    parent_id:  Optional[int]
+    parent_id:  int | None
     sort_order: int
     model_config = {"from_attributes": True}
 
@@ -37,19 +36,19 @@ class CategoryOut(BaseModel):
 
 class ProductCreate(BaseModel):
     store_id:      int
-    category_id:   Optional[int] = None
+    category_id:   int | None = None
     name:          str     = Field(..., min_length=1, max_length=250)
-    description:   Optional[str] = None
-    brand:         Optional[str] = None
-    sku:           Optional[str] = None
-    default_barcode: Optional[str] = None
-    hsn_code:      Optional[str] = Field(None, max_length=10)
+    description:   str | None = None
+    brand:         str | None = None
+    sku:           str | None = None
+    default_barcode: str | None = None
+    hsn_code:      str | None = Field(None, max_length=10)
 
     cost_price:    Decimal = Field(..., gt=0)
     selling_price: Decimal = Field(..., gt=0)
-    mrp:           Optional[Decimal] = None
+    mrp:           Decimal | None = None
     gst_rate:      GSTTaxSlab = GSTTaxSlab.SLAB_18
-    tax_rate:      Optional[Decimal] = None
+    tax_rate:      Decimal | None = None
     cess_rate:     Decimal = Field(default=0, ge=0, le=100)
     price_includes_tax: bool = False
 
@@ -60,7 +59,7 @@ class ProductCreate(BaseModel):
     allow_negative_stock: bool = False
     has_variants:   bool = False
     opening_stock:  int  = Field(0, ge=0)
-    stock_qty:      Optional[int] = Field(None, ge=0)
+    stock_qty:      int | None = Field(None, ge=0)
 
     @model_validator(mode="before")
     @classmethod
@@ -83,28 +82,28 @@ class ProductCreate(BaseModel):
 
 
 class ProductUpdate(BaseModel):
-    name:          Optional[str]        = None
-    category_id:   Optional[int]        = None
-    cost_price:    Optional[Decimal]    = None
-    selling_price: Optional[Decimal]    = None
-    mrp:           Optional[Decimal]    = None
-    gst_rate:      Optional[GSTTaxSlab] = None
-    cess_rate:     Optional[Decimal]    = None
-    min_stock_qty: Optional[int]        = None
-    reorder_qty:   Optional[int]        = None
-    hsn_code:      Optional[str]        = None
-    is_active:     Optional[bool]       = None
+    name:          str | None        = None
+    category_id:   int | None        = None
+    cost_price:    Decimal | None    = None
+    selling_price: Decimal | None    = None
+    mrp:           Decimal | None    = None
+    gst_rate:      GSTTaxSlab | None = None
+    cess_rate:     Decimal | None    = None
+    min_stock_qty: int | None        = None
+    reorder_qty:   int | None        = None
+    hsn_code:      str | None        = None
+    is_active:     bool | None       = None
 
 
 class VariantOut(BaseModel):
     id:            int
     variant_name:  str
-    barcode:       Optional[str]
-    sku:           Optional[str]
-    cost_price:    Optional[Decimal]
-    selling_price: Optional[Decimal]
-    mrp:           Optional[Decimal]
-    attributes:    Optional[Dict[str, Any]]
+    barcode:       str | None
+    sku:           str | None
+    cost_price:    Decimal | None
+    selling_price: Decimal | None
+    mrp:           Decimal | None
+    attributes:    dict[str, Any] | None
     stock_qty:     float
     is_active:     bool
     model_config = {"from_attributes": True}
@@ -113,17 +112,17 @@ class VariantOut(BaseModel):
 class ProductOut(BaseModel):
     id:              int
     store_id:        int
-    category_id:     Optional[int]
+    category_id:     int | None
     name:            str
-    brand:           Optional[str]
-    sku:             Optional[str]
-    default_barcode: Optional[str]
-    hsn_code:        Optional[str]
+    brand:           str | None
+    sku:             str | None
+    default_barcode: str | None
+    hsn_code:        str | None
     cost_price:      Decimal
     selling_price:   Decimal
-    mrp:             Optional[Decimal]
+    mrp:             Decimal | None
     gst_rate:        GSTTaxSlab
-    tax_rate:        Optional[float] = None
+    tax_rate:        float | None = None
     cess_rate:       Decimal
     price_includes_tax: bool
     unit:            str
@@ -131,10 +130,10 @@ class ProductOut(BaseModel):
     reorder_qty:     int
     has_variants:    bool
     is_active:       bool
-    total_stock:     Optional[float] = None   # computed
-    stock_qty:       Optional[float] = None   # default variant compatibility
-    margin_pct:      Optional[float]   = None   # computed
-    variants:        List[VariantOut]  = []
+    total_stock:     float | None = None   # computed
+    stock_qty:       float | None = None   # default variant compatibility
+    margin_pct:      float | None   = None   # computed
+    variants:        list[VariantOut]  = []
     created_at:      datetime
     model_config = {"from_attributes": True}
 
@@ -145,12 +144,12 @@ class VariantCreate(BaseModel):
     product_id:    int
     store_id:      int
     variant_name:  str  = Field(..., min_length=1, max_length=200)
-    attributes:    Optional[Dict[str, Any]] = None
-    cost_price:    Optional[Decimal] = None
-    selling_price: Optional[Decimal] = None
-    mrp:           Optional[Decimal] = None
-    barcode:       Optional[str] = None
-    sku:           Optional[str] = None
+    attributes:    dict[str, Any] | None = None
+    cost_price:    Decimal | None = None
+    selling_price: Decimal | None = None
+    mrp:           Decimal | None = None
+    barcode:       str | None = None
+    sku:           str | None = None
 
 
 # ─── Stock Batch ──────────────────────────────────────────────────────────────
@@ -161,10 +160,10 @@ class BatchReceive(BaseModel):
     batch_number:    str     = Field(..., min_length=1, max_length=100)
     quantity:        Decimal = Field(..., gt=0)
     purchase_price:  Decimal = Field(..., gt=0)
-    expiry_date:     Optional[datetime] = None
-    manufacture_date: Optional[datetime] = None
-    mrp:             Optional[Decimal] = None
-    supplier_id:     Optional[int] = None
+    expiry_date:     datetime | None = None
+    manufacture_date: datetime | None = None
+    mrp:             Decimal | None = None
+    supplier_id:     int | None = None
 
 
 class BatchOut(BaseModel):
@@ -174,9 +173,9 @@ class BatchOut(BaseModel):
     quantity:        float
     qty_remaining:   float
     purchase_price:  float
-    mrp:             Optional[float]
-    expiry_date:     Optional[datetime]
-    manufacture_date: Optional[datetime]
+    mrp:             float | None
+    expiry_date:     datetime | None
+    manufacture_date: datetime | None
     received_at:     datetime
     is_active:       bool
     model_config = {"from_attributes": True}
@@ -185,8 +184,8 @@ class BatchOut(BaseModel):
 # ─── Stock Adjustment ─────────────────────────────────────────────────────────
 
 class StockAdjustment(BaseModel):
-    variant_id: Optional[int] = None
-    product_id: Optional[int] = None
+    variant_id: int | None = None
+    product_id: int | None = None
     store_id:   int = 1
     delta:      Decimal = Field(..., description="Positive=add, Negative=remove")
     reason:     str     = Field(..., min_length=3)
@@ -199,9 +198,9 @@ class StockMovementOut(BaseModel):
     qty_before:     Decimal
     qty_delta:      Decimal
     qty_after:      Decimal
-    reference_type: Optional[str]
-    reference_id:   Optional[int]
-    reason:         Optional[str]
+    reference_type: str | None
+    reference_id:   int | None
+    reason:         str | None
     created_at:     datetime
     model_config = {"from_attributes": True}
 
@@ -228,9 +227,9 @@ class POItemCreate(BaseModel):
 class POCreate(BaseModel):
     store_id:      int
     supplier_id:   int
-    items:         List[POItemCreate] = Field(..., min_length=1)
-    expected_date: Optional[datetime] = None
-    notes:         Optional[str] = None
+    items:         list[POItemCreate] = Field(..., min_length=1)
+    expected_date: datetime | None = None
+    notes:         str | None = None
 
 
 class POItemOut(BaseModel):
@@ -253,10 +252,10 @@ class POOut(BaseModel):
     subtotal:      Decimal
     tax_amount:    Decimal
     total_amount:  Decimal
-    expected_date: Optional[datetime]
-    received_date: Optional[datetime]
-    notes:         Optional[str]
-    items:         List[POItemOut] = []
+    expected_date: datetime | None
+    received_date: datetime | None
+    notes:         str | None
+    items:         list[POItemOut] = []
     created_at:    datetime
     model_config = {"from_attributes": True}
 
@@ -266,11 +265,11 @@ class POOut(BaseModel):
 class SupplierCreate(BaseModel):
     store_id:       int
     name:           str  = Field(..., min_length=2, max_length=200)
-    contact_person: Optional[str] = None
-    phone:          Optional[str] = None
-    email:          Optional[str] = None
-    address:        Optional[str] = None
-    gstin:          Optional[str] = None
+    contact_person: str | None = None
+    phone:          str | None = None
+    email:          str | None = None
+    address:        str | None = None
+    gstin:          str | None = None
     credit_days:    int = 30
 
 

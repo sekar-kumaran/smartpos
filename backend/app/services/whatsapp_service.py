@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import logging
 from decimal import Decimal
-from typing import Optional
 
 log = logging.getLogger("smartpos.notifications")
 
@@ -47,7 +46,7 @@ class WhatsAppService:
         phone: str,
         customer_name: str,
         balance: Decimal,
-        due_date: Optional[str],
+        due_date: str | None,
         store_name: str,
     ) -> bool:
         """Skip external delivery in the public build."""

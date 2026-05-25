@@ -6,9 +6,7 @@ POST /loyalty/award        — manually award bonus points
 
 from __future__ import annotations
 
-from datetime import datetime
 from decimal import Decimal
-from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
@@ -35,13 +33,13 @@ class LoyaltyConfig(BaseModel):
 class CustomerLoyaltyOut(BaseModel):
     customer_id:      int
     customer_name:    str
-    phone:            Optional[str]
+    phone:            str | None
     total_points:     int
     redeemed_points:  int
     available_points: int
     tier:             str
     total_spent:      float
-    last_txn_date:    Optional[str]
+    last_txn_date:    str | None
 
 
 class CustomerLoyaltyPage(BaseModel):
@@ -96,7 +94,7 @@ async def loyalty_customers(
     items: list[CustomerLoyaltyOut] = []
     for c in customers:
         pts = c.loyalty_points
-        last_date: Optional[str] = None
+        last_date: str | None = None
         if c.last_purchase_at:
             last_date = c.last_purchase_at.strftime("%Y-%m-%d")
 

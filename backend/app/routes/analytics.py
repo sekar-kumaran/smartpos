@@ -1,7 +1,6 @@
 """SmartPOS AI – Analytics Routes (Phase 1A)"""
 
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
@@ -32,14 +31,14 @@ async def dashboard(
 @router.get("/profit", response_model=ProfitSummary)
 async def profit_summary(
     store_id:   int      = Query(...),
-    start_date: Optional[datetime] = Query(None),
-    end_date:   Optional[datetime] = Query(None),
-    period: Optional[str] = Query(None, pattern="^(today|week|month)$"),
+    start_date: datetime | None = Query(None),
+    end_date:   datetime | None = Query(None),
+    period: str | None = Query(None, pattern="^(today|week|month)$"),
     _: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ):
     """Profit summary for a date range."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(datetime.UTC)
     if period:
         if period == "today":
             start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -70,14 +69,14 @@ async def revenue_trend(
 @router.get("/top-products", response_model=list)
 async def top_products(
     store_id:   int      = Query(...),
-    start_date: Optional[datetime] = Query(None),
-    end_date:   Optional[datetime] = Query(None),
+    start_date: datetime | None = Query(None),
+    end_date:   datetime | None = Query(None),
     limit:      int      = Query(10, ge=1, le=50),
     _: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ):
     """Top products by revenue in a date range."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(datetime.UTC)
     sd  = start_date or (now - timedelta(days=30))
     ed  = end_date or now
     return await _service.get_top_products(db, store_id, sd, ed, limit)
@@ -212,7 +211,7 @@ class GSTR1Summary(BaseModel):
 async def gstr1_summary(
     store_id: int    = Query(...),
     period:   str    = Query(..., pattern=r"^\d{4}-\d{2}$", description="YYYY-MM"),
-    gstin:    Optional[str] = Query(None),
+    gstin:    str | None = Query(None),
     _: int = Depends(get_current_user_id),
     db: AsyncSession = Depends(get_db),
 ):
@@ -222,12 +221,12 @@ async def gstr1_summary(
     except ValueError:
         raise HTTPException(status_code=422, detail="period must be YYYY-MM")
 
-    start = datetime(year, month, 1, tzinfo=timezone.utc)
+    start = datetime(year, month, 1, tzinfo=datetime.UTC)
     # Last day: first day of next month minus 1 second
     if month == 12:
-        end = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+        end = datetime(year + 1, 1, 1, tzinfo=datetime.UTC)
     else:
-        end = datetime(year, month + 1, 1, tzinfo=timezone.utc)
+        end = datetime(year, month + 1, 1, tzinfo=datetime.UTC)
 
     result = await db.execute(
         select(

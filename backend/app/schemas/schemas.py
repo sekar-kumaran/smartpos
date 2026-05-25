@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
@@ -35,10 +34,10 @@ class MessageResponse(BaseModel):
 class RegisterRequest(BaseModel):
     name:     str         = Field(..., min_length=1, max_length=120)
     email:    EmailStr
-    phone:    Optional[str] = None
+    phone:    str | None = None
     password: str         = Field(..., min_length=8)
     role:     UserRole    = UserRole.CASHIER
-    store_id: Optional[int] = None
+    store_id: int | None = None
 
 
 class LoginRequest(BaseModel):
@@ -59,10 +58,10 @@ class UserOut(BaseModel):
     id:         int
     name:       str
     email:      str
-    phone:      Optional[str]
+    phone:      str | None
     role:       UserRole
     is_active:  bool
-    store_id:   Optional[int]
+    store_id:   int | None
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -72,9 +71,9 @@ class UserOut(BaseModel):
 
 class StoreCreate(BaseModel):
     name:     str = Field(..., min_length=2, max_length=150)
-    address:  Optional[str] = None
-    phone:    Optional[str] = None
-    gstin:    Optional[str] = None
+    address:  str | None = None
+    phone:    str | None = None
+    gstin:    str | None = None
     currency: str = "INR"
 
 
@@ -99,10 +98,10 @@ class CategoryOut(CategoryCreate):
 
 class ProductCreate(BaseModel):
     store_id:      int
-    category_id:   Optional[int] = None
+    category_id:   int | None = None
     name:          str      = Field(..., min_length=1, max_length=200)
-    sku:           Optional[str] = None
-    barcode:       Optional[str] = None
+    sku:           str | None = None
+    barcode:       str | None = None
     unit:          str      = "pcs"
     cost_price:    Decimal  = Field(..., ge=0)
     selling_price: Decimal  = Field(..., ge=0)
@@ -120,13 +119,13 @@ class ProductCreate(BaseModel):
 
 
 class ProductUpdate(BaseModel):
-    name:          Optional[str]     = None
-    category_id:   Optional[int]     = None
-    cost_price:    Optional[Decimal] = None
-    selling_price: Optional[Decimal] = None
-    tax_rate:      Optional[Decimal] = None
-    min_stock_qty: Optional[int]     = None
-    is_active:     Optional[bool]    = None
+    name:          str | None     = None
+    category_id:   int | None     = None
+    cost_price:    Decimal | None = None
+    selling_price: Decimal | None = None
+    tax_rate:      Decimal | None = None
+    min_stock_qty: int | None     = None
+    is_active:     bool | None    = None
 
 
 class StockAdjustment(BaseModel):
@@ -138,10 +137,10 @@ class StockAdjustment(BaseModel):
 class ProductOut(BaseModel):
     id:            int
     store_id:      int
-    category_id:   Optional[int]
+    category_id:   int | None
     name:          str
-    sku:           Optional[str]
-    barcode:       Optional[str]
+    sku:           str | None
+    barcode:       str | None
     unit:          str
     cost_price:    Decimal
     selling_price: Decimal
@@ -149,7 +148,7 @@ class ProductOut(BaseModel):
     stock_qty:     int
     min_stock_qty: int
     is_active:     bool
-    margin_pct:    Optional[float] = None   # computed
+    margin_pct:    float | None = None   # computed
     created_at:    datetime
     model_config = {"from_attributes": True}
 
@@ -159,26 +158,26 @@ class ProductOut(BaseModel):
 class CustomerCreate(BaseModel):
     store_id:          int
     name:              str           = Field(..., min_length=2, max_length=150)
-    phone:             Optional[str] = None
-    address:           Optional[str] = None
-    price_category_id: Optional[int] = None
+    phone:             str | None = None
+    address:           str | None = None
+    price_category_id: int | None = None
 
 
 class CustomerUpdate(BaseModel):
-    name:              Optional[str] = None
-    phone:             Optional[str] = None
-    address:           Optional[str] = None
-    price_category_id: Optional[int] = None
+    name:              str | None = None
+    phone:             str | None = None
+    address:           str | None = None
+    price_category_id: int | None = None
 
 
 class CustomerOut(BaseModel):
     id:                  int
     store_id:            int
     name:                str
-    phone:               Optional[str]
-    address:             Optional[str]
-    price_category_id:   Optional[int]
-    price_category_name: Optional[str] = None   # populated via join
+    phone:               str | None
+    address:             str | None
+    price_category_id:   int | None
+    price_category_name: str | None = None   # populated via join
     total_credit_given:  Decimal
     total_credit_repaid: Decimal
     outstanding_balance: Decimal        # computed
@@ -191,23 +190,23 @@ class CustomerOut(BaseModel):
 class PriceCategoryCreate(BaseModel):
     store_id:    int
     name:        str           = Field(..., min_length=1, max_length=100)
-    description: Optional[str] = None
+    description: str | None = None
     color:       str           = "#6366f1"
     is_default:  bool          = False
 
 
 class PriceCategoryUpdate(BaseModel):
-    name:        Optional[str]  = None
-    description: Optional[str]  = None
-    color:       Optional[str]  = None
-    is_active:   Optional[bool] = None
+    name:        str | None  = None
+    description: str | None  = None
+    color:       str | None  = None
+    is_active:   bool | None = None
 
 
 class PriceCategoryOut(BaseModel):
     id:          int
     store_id:    int
     name:        str
-    description: Optional[str]
+    description: str | None
     color:       str
     is_default:  bool
     is_active:   bool
@@ -217,7 +216,7 @@ class PriceCategoryOut(BaseModel):
 
 class ProductPriceTierCreate(BaseModel):
     store_id:          int
-    price_category_id: Optional[int] = None
+    price_category_id: int | None = None
     product_id:        int
     price:             Decimal = Field(..., ge=0)
 
@@ -227,7 +226,7 @@ class ProductPriceTierOut(BaseModel):
     price_category_id:  int
     product_id:         int
     price:              Decimal
-    product_name:       Optional[str] = None   # populated via join
+    product_name:       str | None = None   # populated via join
     created_at:         datetime
     model_config = {"from_attributes": True}
 
@@ -237,34 +236,34 @@ class ProductPriceTierOut(BaseModel):
 class ShiftOpenRequest(BaseModel):
     store_id:     int
     opening_cash: Decimal = Field(default=0, ge=0)
-    notes:        Optional[str] = None
+    notes:        str | None = None
 
 
 class ShiftCloseRequest(BaseModel):
     closing_cash: Decimal = Field(..., ge=0)
-    notes:        Optional[str] = None
+    notes:        str | None = None
 
 
 class ShiftOut(BaseModel):
     id:            int
     store_id:      int
     opened_by_id:  int
-    closed_by_id:  Optional[int]
+    closed_by_id:  int | None
     opened_at:     datetime
-    closed_at:     Optional[datetime]
+    closed_at:     datetime | None
     opening_cash:  Decimal
-    closing_cash:  Optional[Decimal]
-    expected_cash: Optional[Decimal]
+    closing_cash:  Decimal | None
+    expected_cash: Decimal | None
     total_sales:   int
     total_revenue: Decimal
     cash_sales:    Decimal
     upi_sales:     Decimal
     card_sales:    Decimal
     credit_sales:  Decimal
-    cash_variance: Optional[Decimal] = None   # closing_cash - expected_cash
-    notes:         Optional[str]
+    cash_variance: Decimal | None = None   # closing_cash - expected_cash
+    notes:         str | None
     status:        ShiftStatus
-    opened_by_name: Optional[str] = None
+    opened_by_name: str | None = None
     model_config = {"from_attributes": True}
 
 
@@ -275,11 +274,11 @@ class DemandForecastItem(BaseModel):
     product_name:       str
     current_stock:      Decimal
     avg_daily_sales:    float
-    days_of_stock_left: Optional[float]   # None = no sales data
+    days_of_stock_left: float | None   # None = no sales data
     forecast_7d:        float             # predicted units needed next 7 days
     reorder_suggested:  bool
     reorder_qty:        int
-    stockout_date:      Optional[str]     # ISO date string or None
+    stockout_date:      str | None     # ISO date string or None
 
 
 # ─── Billing ──────────────────────────────────────────────────────────────────
@@ -287,19 +286,19 @@ class DemandForecastItem(BaseModel):
 class SaleItemCreate(BaseModel):
     product_id: int
     qty:        Decimal = Field(..., gt=0)
-    unit_price: Optional[Decimal] = None   # override; else uses product price
+    unit_price: Decimal | None = None   # override; else uses product price
     discount:   Decimal = Field(default=0, ge=0)
 
 
 class SaleCreate(BaseModel):
     store_id:       int
-    customer_id:    Optional[int]          = None
-    items:          List[SaleItemCreate]   = Field(..., min_length=1)
+    customer_id:    int | None          = None
+    items:          list[SaleItemCreate]   = Field(..., min_length=1)
     payment_method: PaymentMethod          = PaymentMethod.CASH
     discount:       Decimal                = Field(default=0, ge=0)
-    amount_paid:    Optional[Decimal]      = None
-    notes:          Optional[str]          = None
-    local_id:       Optional[str]          = None   # device UUID for dedup
+    amount_paid:    Decimal | None      = None
+    notes:          str | None          = None
+    local_id:       str | None          = None   # device UUID for dedup
 
 
 class SaleItemOut(BaseModel):
@@ -318,7 +317,7 @@ class SaleOut(BaseModel):
     id:             int
     store_id:       int
     cashier_id:     int
-    customer_id:    Optional[int]
+    customer_id:    int | None
     invoice_number: str
     subtotal:       Decimal
     tax_amount:     Decimal
@@ -328,9 +327,9 @@ class SaleOut(BaseModel):
     amount_paid:    Decimal
     amount_due:     Decimal
     status:         SaleStatus
-    notes:          Optional[str]
+    notes:          str | None
     is_synced:      bool
-    items:          List[SaleItemOut] = []
+    items:          list[SaleItemOut] = []
     created_at:     datetime
     model_config = {"from_attributes": True}
 
@@ -340,30 +339,30 @@ class SaleOut(BaseModel):
 class CreditCreate(BaseModel):
     store_id:    int
     customer_id: int
-    sale_id:     Optional[int] = None
+    sale_id:     int | None = None
     amount:      Decimal = Field(..., gt=0)
-    due_date:    Optional[datetime] = None
-    notes:       Optional[str] = None
+    due_date:    datetime | None = None
+    notes:       str | None = None
 
 
 class RepaymentCreate(BaseModel):
     credit_id: int
     amount:    Decimal = Field(..., gt=0)
     method:    PaymentMethod = PaymentMethod.CASH
-    notes:     Optional[str] = None
+    notes:     str | None = None
 
 
 class CreditOut(BaseModel):
     id:            int
     store_id:      int
     customer_id:   int
-    sale_id:       Optional[int]
+    sale_id:       int | None
     amount:        Decimal
     amount_repaid: Decimal
     balance:       Decimal
-    due_date:      Optional[datetime]
+    due_date:      datetime | None
     status:        CreditStatus
-    notes:         Optional[str]
+    notes:         str | None
     created_at:    datetime
     model_config = {"from_attributes": True}
 
@@ -405,7 +404,7 @@ class DashboardSummary(BaseModel):
     profit:    ProfitSummary
     inventory: InventoryHealth
     credit:    CreditExposure
-    alerts:    List[dict]
+    alerts:    list[dict]
 
 
 # ─── Alerts ───────────────────────────────────────────────────────────────────
@@ -428,5 +427,5 @@ class AlertOut(BaseModel):
 class SyncPayload(BaseModel):
     device_id: str
     store_id:  int
-    sales:     List[SaleCreate] = []
+    sales:     list[SaleCreate] = []
     timestamp: datetime

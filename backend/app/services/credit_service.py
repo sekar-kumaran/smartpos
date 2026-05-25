@@ -3,7 +3,7 @@ SmartPOS AI – Credit Service
 Manages credit ledger, repayments, overdue detection, and risk exposure.
 """
 
-from datetime import datetime, timezone
+from datetime import datetime
 from decimal import Decimal
 
 from fastapi import HTTPException
@@ -115,7 +115,7 @@ class CreditService:
     async def get_credit_exposure(
         self, db: AsyncSession, store_id: int
     ) -> CreditExposure:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(datetime.UTC)
 
         result = await db.execute(
             select(Credit).where(

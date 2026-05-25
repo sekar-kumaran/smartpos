@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
 from sqlalchemy import delete
 
@@ -18,7 +18,7 @@ def cleanup_old_sync_logs(days: int = 30) -> dict:
     import asyncio
 
     async def _run() -> dict:
-        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+        cutoff = datetime.now(datetime.UTC) - timedelta(days=days)
         async with AsyncSessionFactory() as db:
             result = await db.execute(delete(SyncLog).where(SyncLog.created_at < cutoff))
             await db.commit()

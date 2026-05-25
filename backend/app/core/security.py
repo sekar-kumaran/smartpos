@@ -3,8 +3,8 @@ SmartPOS AI – Security Utilities
 JWT token creation/verification + password hashing.
 """
 
-from datetime import datetime, timedelta, timezone
-from typing import Any, Optional
+from datetime import datetime, timedelta
+from typing import Any
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -31,14 +31,14 @@ def verify_password(plain: str, hashed: str) -> bool:
 bearer_scheme = HTTPBearer()
 
 
-def create_access_token(subject: Any, extra: Optional[dict] = None) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(
+def create_access_token(subject: Any, extra: dict[str, Any] | None = None) -> str:
+    expire = datetime.now(datetime.UTC) + timedelta(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
     payload = {
         "sub": str(subject),
         "exp": expire,
-        "iat": datetime.now(timezone.utc),
+        "iat": datetime.now(datetime.UTC),
         "type": "access",
         **(extra or {}),
     }
@@ -46,13 +46,13 @@ def create_access_token(subject: Any, extra: Optional[dict] = None) -> str:
 
 
 def create_refresh_token(subject: Any) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(
+    expire = datetime.now(datetime.UTC) + timedelta(
         days=settings.REFRESH_TOKEN_EXPIRE_DAYS
     )
     payload = {
         "sub": str(subject),
         "exp": expire,
-        "iat": datetime.now(timezone.utc),
+        "iat": datetime.now(datetime.UTC),
         "type": "refresh",
     }
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)

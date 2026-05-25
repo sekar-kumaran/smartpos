@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
@@ -35,8 +34,8 @@ router = APIRouter()
 class VoiceBillItem(BaseModel):
     product_name: str
     quantity:     float
-    matched_id:   Optional[int]   = None
-    unit_price:   Optional[float] = None
+    matched_id:   int | None   = None
+    unit_price:   float | None = None
     confidence:   float           = 0.0
 
 
@@ -44,8 +43,8 @@ class VoiceTranscribeResponse(BaseModel):
     transcript:  str
     items:       list[VoiceBillItem]
     confidence:  float
-    raw_parse:   Optional[str] = None
-    error:       Optional[str] = None
+    raw_parse:   str | None = None
+    error:       str | None = None
 
 
 # ─── Route ────────────────────────────────────────────────────────────────────

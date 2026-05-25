@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import logging
 import time
 import uuid
-import logging
 from contextlib import asynccontextmanager
 from typing import Callable
 
@@ -15,8 +15,20 @@ from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 from app.core.database import engine, init_db
-from app.routes import auth, billing, inventory, credit, analytics, backup, health
-from app.routes import price_categories, shifts, whatsapp, voice, loyalty
+from app.routes import (
+    analytics,
+    auth,
+    backup,
+    billing,
+    credit,
+    health,
+    inventory,
+    loyalty,
+    price_categories,
+    shifts,
+    voice,
+    whatsapp,
+)
 
 logging.basicConfig(
     level=logging.DEBUG if settings.DEBUG else logging.INFO,
