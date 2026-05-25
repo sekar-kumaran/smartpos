@@ -1,0 +1,30 @@
+# node_modules installed fresh inside image — never copy from host
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Build output (rebuilt inside image)
+dist/
+build/
+
+# Test artefacts
+coverage/
+.jest-cache/
+__tests__/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Dev tooling
+.git/
+.github/
+.vscode/
+.idea/
+*.log
+*.md
+
+# OS
+.DS_Store
+Thumbs.db

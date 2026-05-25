@@ -1,0 +1,38 @@
+# Secrets — NEVER ship into image
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+coverage.xml
+*.egg-info/
+dist/
+build/
+
+# Test artefacts
+.tox/
+test_*.db
+*_local.db
+pytest-cache-files-*/
+
+# Dev tooling
+.git/
+.github/
+.vscode/
+.idea/
+*.log
+
+# Docs
+docs/
+*.md

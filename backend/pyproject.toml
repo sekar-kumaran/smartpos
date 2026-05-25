@@ -1,0 +1,24 @@
+[tool.pytest.ini_options]
+asyncio_mode                       = "auto"
+asyncio_default_fixture_loop_scope = "session"
+testpaths                          = ["tests"]
+python_files                       = ["test_*.py"]
+python_functions                   = ["test_*"]
+log_cli                            = true
+log_cli_level                      = "WARNING"
+addopts                            = "--tb=short -q"
+
+[tool.ruff]
+target-version = "py312"
+line-length    = 100
+select         = ["E", "F", "I", "UP", "B"]
+ignore         = ["E501", "B008"]
+exclude        = ["alembic/"]
+
+[tool.coverage.run]
+source = ["app"]
+omit   = ["*/tests/*", "*/alembic/*"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under   = 70

@@ -1,0 +1,62 @@
+{
+  "name": "smartpos-ai",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "android":     "react-native run-android",
+    "ios":         "react-native run-ios",
+    "start":       "react-native start",
+    "web":         "vite --host 0.0.0.0",
+    "web:build":   "vite build",
+    "web:preview": "vite preview --host 0.0.0.0",
+    "test":        "jest",
+    "lint":        "eslint . --ext .ts,.tsx",
+    "type-check":  "tsc --noEmit"
+  },
+  "dependencies": {
+    "react":                              "18.3.1",
+    "react-native":                       "0.76.5",
+
+    "@react-navigation/native":           "^7.0.14",
+    "@react-navigation/native-stack":     "^7.2.0",
+    "@react-navigation/bottom-tabs":      "^7.2.0",
+
+    "react-native-screens":               "^4.4.0",
+    "react-native-safe-area-context":     "^5.0.0",
+    "react-native-gesture-handler":       "^2.20.2",
+
+    "axios":                              "^1.7.9",
+    "@react-native-async-storage/async-storage": "^2.1.0",
+    "react-dom":                          "18.3.1",
+    "react-native-web":                   "0.19.12",
+
+    "zustand":                            "^5.0.2",
+
+    "react-native-get-random-values":     "^1.11.0",
+    "uuid":                               "^11.0.3",
+
+    "react-native-vector-icons":          "^10.2.0"
+  },
+  "devDependencies": {
+    "@babel/core":                        "^7.25.2",
+    "@babel/preset-env":                  "^7.25.3",
+    "@babel/runtime":                     "^7.25.0",
+    "@react-native/babel-preset":         "0.76.5",
+    "@react-native/eslint-config":        "0.76.5",
+    "@react-native/metro-config":         "0.76.5",
+    "@react-native/typescript-config":    "0.76.5",
+    "@types/react":                       "^18.3.1",
+    "@types/react-dom":                   "^18.3.0",
+    "@types/react-native":                "^0.73.0",
+    "@types/uuid":                        "^10.0.0",
+    "@vitejs/plugin-react":               "^4.3.1",
+    "eslint":                             "^8.19.0",
+    "@testing-library/react-native":       "^12.4.0",
+    "@testing-library/jest-native":        "^5.4.3",
+    "jest":                               "^29.6.3",
+    "prettier":                           "2.8.8",
+    "react-test-renderer":                "18.3.1",
+    "typescript":                         "5.0.4",
+    "vite":                               "^5.4.2"
+  }
+}

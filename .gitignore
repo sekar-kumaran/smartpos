@@ -1,0 +1,61 @@
+# ── Python / Backend ──────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.eggs/
+*.so
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+*.log
+*.tmp
+
+# Backend env & secrets
+backend/.env
+/.env
+/.env.*
+backend/smartpos_local.db
+backend/test_local.db
+!/.env.example
+!backend/.env.example
+
+# ── Node / React Native ───────────────────────────────────────────────────────
+node_modules/
+frontend/node_modules/
+.npm
+.yarn/cache
+.yarn/unplugged
+.pnp.*
+frontend/dist/
+frontend/ios/Pods/
+frontend/ios/build/
+frontend/android/.gradle/
+frontend/android/build/
+frontend/android/app/build/
+frontend/android/local.properties
+*.jks
+*.keystore
+!debug.keystore
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+devops/nginx/certs/
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+*.enc
+*.backup
