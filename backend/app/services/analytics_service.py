@@ -6,7 +6,7 @@ proprietary forecasting, anomaly scoring, and intelligence orchestration.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any
 
@@ -77,7 +77,7 @@ class AnalyticsService:
         )
 
     async def get_dashboard_summary(self, db: AsyncSession, store_id: int) -> DashboardSummary:
-        now = datetime.now(datetime.UTC)
+        now = datetime.now(timezone.utc)
         start = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
         profit = await self.get_profit_summary(db, store_id, start, now)
@@ -95,7 +95,7 @@ class AnalyticsService:
     async def get_revenue_trend(
         self, db: AsyncSession, store_id: int, days: int = 30
     ) -> list[dict[str, Any]]:
-        start = datetime.now(datetime.UTC) - timedelta(days=days)
+        start = datetime.now(timezone.utc) - timedelta(days=days)
         result = await db.execute(
             select(
                 func.date(Sale.created_at).label("day"),
@@ -158,7 +158,7 @@ class AnalyticsService:
     async def get_hourly_heatmap(
         self, db: AsyncSession, store_id: int, days: int = 14
     ) -> list[dict[str, Any]]:
-        start = datetime.now(datetime.UTC) - timedelta(days=days)
+        start = datetime.now(timezone.utc) - timedelta(days=days)
         result = await db.execute(
             select(
                 func.extract("hour", Sale.created_at).label("hour"),

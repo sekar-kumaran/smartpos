@@ -3,27 +3,29 @@ SmartPOS AI – Security Utilities
 JWT token creation/verification + password hashing.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
 
 from app.core.config import settings
 
 # ─── Password Hashing ─────────────────────────────────────────────────────────
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+def _to_bytes(value: str) -> bytes:
+    return value.encode("utf-8")
 
 
 def hash_password(plain: str) -> str:
-    return pwd_context.hash(plain)
+    hashed = bcrypt.hashpw(_to_bytes(plain), bcrypt.gensalt())
+    return hashed.decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    return bcrypt.checkpw(_to_bytes(plain), _to_bytes(hashed))
 
 
 # ─── JWT ──────────────────────────────────────────────────────────────────────
@@ -32,13 +34,13 @@ bearer_scheme = HTTPBearer()
 
 
 def create_access_token(subject: Any, extra: dict[str, Any] | None = None) -> str:
-    expire = datetime.now(datetime.UTC) + timedelta(
+    expire = datetime.now(timezone.utc) + timedelta(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
     payload = {
         "sub": str(subject),
         "exp": expire,
-        "iat": datetime.now(datetime.UTC),
+        "iat": datetime.now(timezone.utc),
         "type": "access",
         **(extra or {}),
     }
@@ -46,13 +48,13 @@ def create_access_token(subject: Any, extra: dict[str, Any] | None = None) -> st
 
 
 def create_refresh_token(subject: Any) -> str:
-    expire = datetime.now(datetime.UTC) + timedelta(
+    expire = datetime.now(timezone.utc) + timedelta(
         days=settings.REFRESH_TOKEN_EXPIRE_DAYS
     )
     payload = {
         "sub": str(subject),
         "exp": expire,
-        "iat": datetime.now(datetime.UTC),
+        "iat": datetime.now(timezone.utc),
         "type": "refresh",
     }
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)

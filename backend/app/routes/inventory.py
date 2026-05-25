@@ -351,10 +351,10 @@ async def create_purchase_order(
     db: AsyncSession = Depends(get_db),
 ):
     """Create a purchase order. Stock updated when marked RECEIVED."""
-    from datetime import datetime
+    from datetime import datetime, timezone
     from decimal import Decimal
 
-    today   = datetime.now(datetime.UTC).strftime("%Y%m%d")
+    today   = datetime.now(timezone.utc).strftime("%Y%m%d")
     cnt_res = await db.execute(
         select(func.count(PurchaseOrder.id))
         .where(PurchaseOrder.store_id == payload.store_id)
@@ -407,7 +407,7 @@ async def receive_purchase_order(
     """
     Receive a PO — creates stock batches and updates variant quantities.
     """
-    from datetime import datetime
+    from datetime import datetime, timezone
 
     result = await db.execute(
         select(PurchaseOrder)
@@ -438,7 +438,7 @@ async def receive_purchase_order(
         item.qty_received = item.qty_ordered
 
     po.status        = POStatus.RECEIVED
-    po.received_date = datetime.now(datetime.UTC)
+    po.received_date = datetime.now(timezone.utc)
     return po
 
 

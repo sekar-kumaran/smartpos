@@ -43,6 +43,9 @@ class Base(DeclarativeBase):
 # ─── Engine Factory ───────────────────────────────────────────────────────────
 
 def _make_engine(url: str, is_sqlite: bool = False):
+    url_lower = url.lower()
+    is_sqlite = is_sqlite or url_lower.startswith("sqlite")
+
     kwargs: dict = {
         "echo": settings.DEBUG,
         "pool_pre_ping": True,

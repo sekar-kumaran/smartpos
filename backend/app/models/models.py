@@ -14,7 +14,7 @@ Schema principles:
 from __future__ import annotations
 
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 
 from sqlalchemy import (
@@ -37,7 +37,7 @@ from app.core.database import Base
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
 def utcnow() -> datetime:
-    return datetime.now(datetime.UTC)
+    return datetime.now(timezone.utc)
 
 
 # ─── Enums ────────────────────────────────────────────────────────────────────

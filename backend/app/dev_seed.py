@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from secrets import token_urlsafe
 
@@ -93,7 +93,7 @@ async def seed_demo_data(db: AsyncSession) -> None:
         return
 
     user_id = existing_user.id if existing_user else user.id
-    now = datetime.now(datetime.UTC)
+    now = datetime.now(timezone.utc)
 
     staples = Category(store_id=store_id, name="Staples", sort_order=1)
     dairy = Category(store_id=store_id, name="Dairy", sort_order=2)

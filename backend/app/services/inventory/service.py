@@ -237,6 +237,7 @@ class InventoryService:
             supplier_id=supplier_id,
             po_item_id=po_item_id,
         )
+        db.add(batch)
         await db.flush()
 
         # Update variant total stock
